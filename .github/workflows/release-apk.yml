@@ -21,13 +21,16 @@ jobs:
 
       - name: Fetch OpenXR-SDK
         run: |
+          echo "DEBUG: Starting Fetch OpenXR-SDK"
           rm -f .gitmodules app/.gitmodules
           rm -rf app/src/main/cpp/OpenXR-SDK
           for i in 1 2 3; do
+            echo "DEBUG: Clone attempt $i"
             git clone --depth 1 https://github.com/KhronosGroup/OpenXR-SDK.git app/src/main/cpp/OpenXR-SDK && break
             sleep 10
           done
-          test -f app/src/main/cpp/OpenXR-SDK/src/CMakeLists.txt || (echo "OpenXR-SDK clone failed"; exit 1)
+          test -f app/src/main/cpp/OpenXR-SDK/src/CMakeLists.txt || (echo "DEBUG: OpenXR-SDK clone FAILED"; exit 1)
+          echo "DEBUG: Fetch OpenXR-SDK completed OK"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -37,11 +40,13 @@ jobs:
 
       - name: Install Gradle and generate wrapper (no cache)
         run: |
+          echo "DEBUG: Installing Gradle"
           curl -sL -o gradle.zip "https://services.gradle.org/distributions/gradle-7.4-bin.zip"
           unzip -q gradle.zip
           echo "PATH=$PWD/gradle-7.4/bin:$PATH" >> $GITHUB_ENV
           gradle wrapper --gradle-version 7.4
           chmod +x gradlew
+          echo "DEBUG: Gradle wrapper OK"
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -50,6 +55,8 @@ jobs:
         run: |
           echo "ANDROID_HOME=${ANDROID_SDK_ROOT:-$HOME/.android/sdk}" >> $GITHUB_ENV
           echo "ANDROID_NDK_HOME=${ANDROID_SDK_ROOT:-$HOME/.android/sdk}/ndk/22.1.7171670" >> $GITHUB_ENV
+          echo "DEBUG: ANDROID_HOME=$ANDROID_HOME ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
+          ls -la "${ANDROID_NDK_HOME:-$HOME/.android/sdk/ndk/22.1.7171670}" 2>/dev/null || echo "DEBUG: NDK dir not found yet"
 
       - name: Accept licenses
         run: yes | sdkmanager --licenses || true
@@ -58,11 +65,14 @@ jobs:
         run: |
           sdkmanager "ndk;22.1.7171670"
           sdkmanager "cmake;3.18.1"
+          echo "DEBUG: NDK/CMake installed"
 
       - name: Build APK
         run: |
+          echo "DEBUG: Starting Build APK"
           ./gradlew assembleDebug --no-daemon --stacktrace > build.log 2>&1
           EXIT=$?
+          echo "DEBUG: Gradle exit code=$EXIT"
           cat build.log
           exit $EXIT
 
