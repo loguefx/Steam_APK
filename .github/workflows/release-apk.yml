@@ -17,21 +17,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: recursive
-
-      - name: Fetch OpenXR-SDK if missing
-        run: |
-          if [ ! -f app/src/main/cpp/OpenXR-SDK/src/CMakeLists.txt ]; then
-            rm -rf app/src/main/cpp/OpenXR-SDK
-            git clone --depth 1 https://github.com/KhronosGroup/OpenXR-SDK.git app/src/main/cpp/OpenXR-SDK
-          fi
+          submodules: false
 
       - name: Fetch OpenXR-SDK
-        run: |
-          rm -rf app/src/main/cpp/OpenXR-SDK
-          git clone --depth 1 https://github.com/KhronosGroup/OpenXR-SDK.git app/src/main/cpp/OpenXR-SDK
-
-      - name: Disable submodules and fetch OpenXR-SDK
         run: |
           rm -f .gitmodules app/.gitmodules
           rm -rf app/src/main/cpp/OpenXR-SDK
