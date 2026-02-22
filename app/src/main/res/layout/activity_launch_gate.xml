@@ -38,4 +38,12 @@
         android:layout_height="wrap_content"
         android:indeterminate="true"
         android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/SteamSignInShowLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Show debug log"
+        android:visibility="visible" />
 </LinearLayout>
