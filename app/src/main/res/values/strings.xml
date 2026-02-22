@@ -31,6 +31,8 @@
     <string name="controller_disconnected">Disconnected</string>
     <string name="no_controllers_connected">No controllers connected</string>
     <string name="steam_store_url">https://store.steampowered.com</string>
+    <!-- Steam OpenID return_to: must be https (Steam rejects custom schemes). App intercepts this URL in WebView. -->
+    <string name="steam_openid_return_to">https://loguefx.github.io/Steam_APK/steam-callback.html</string>
     <string name="emulator_performance">Performance</string>
     <string name="emulator_performance_summary">Box86/64 presets, translation, compatibility</string>
     <string name="components_compatibility_title">Compatibility components (Game Hub API)</string>
