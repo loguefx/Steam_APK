@@ -23,7 +23,11 @@ jobs:
         run: |
           rm -f .gitmodules app/.gitmodules
           rm -rf app/src/main/cpp/OpenXR-SDK
-          git clone --depth 1 https://github.com/KhronosGroup/OpenXR-SDK.git app/src/main/cpp/OpenXR-SDK
+          for i in 1 2 3; do
+            git clone --depth 1 https://github.com/KhronosGroup/OpenXR-SDK.git app/src/main/cpp/OpenXR-SDK && break
+            sleep 10
+          done
+          test -f app/src/main/cpp/OpenXR-SDK/src/CMakeLists.txt || (echo "OpenXR-SDK clone failed"; exit 1)
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -61,6 +65,10 @@ jobs:
           EXIT=$?
           cat build.log
           exit $EXIT
+
+      - name: Prepare build log for upload
+        if: failure()
+        run: if [ ! -f build.log ]; then echo "No build log - job failed before Build APK step." > build.log; fi
 
       - name: Upload build log on failure
         if: failure()
