@@ -24,13 +24,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 7.4
-
-      - name: Generate Gradle wrapper (Unix)
+      - name: Install Gradle and generate wrapper (no cache)
         run: |
+          curl -sL -o gradle.zip "https://services.gradle.org/distributions/gradle-7.4-bin.zip"
+          unzip -q gradle.zip
+          echo "PATH=$PWD/gradle-7.4/bin:$PATH" >> $GITHUB_ENV
           gradle wrapper --gradle-version 7.4
           chmod +x gradlew
 
@@ -51,7 +49,9 @@ jobs:
           sdkmanager "cmake;3.18.1"
 
       - name: Build APK
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --no-build-cache
+        env:
+          GRADLE_USER_HOME: ${{ runner.temp }}/.gradle
 
       - name: Create Release and upload APK
         uses: softprops/action-gh-release@v2
