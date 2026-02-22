@@ -26,6 +26,11 @@ jobs:
             git clone --depth 1 https://github.com/KhronosGroup/OpenXR-SDK.git app/src/main/cpp/OpenXR-SDK
           fi
 
+      - name: Fetch OpenXR-SDK
+        run: |
+          rm -rf app/src/main/cpp/OpenXR-SDK
+          git clone --depth 1 https://github.com/KhronosGroup/OpenXR-SDK.git app/src/main/cpp/OpenXR-SDK
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
