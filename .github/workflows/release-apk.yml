@@ -65,6 +65,8 @@ jobs:
           ./gradlew assembleDebug --no-daemon --stacktrace > build.log 2>&1
           EXIT=$?
           cat build.log
+          echo "--- Last 150 lines of build.log (error usually at end) ---"
+          tail -150 build.log
           exit $EXIT
 
       - name: Prepare build log for upload
