@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/FieldSetLabel"
+            android:text="@string/compatibility" />
+
+        <LinearLayout
+            style="@style/FieldSet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TVDeviceInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:padding="8dp" />
+
+            <View style="@style/HorizontalLine" />
+
+            <TextView
+                android:id="@+id/TVExplanation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/compatibility_explanation"
+                android:textSize="14sp"
+                android:padding="8dp" />
+
+            <View style="@style/HorizontalLine" />
+
+            <Button
+                android:id="@+id/BTClearTempCache"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clear_temp_cache" />
+
+            <Button
+                android:id="@+id/BTClearShaderCache"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/clear_shader_cache" />
+
+            <View style="@style/HorizontalLine" />
+
+            <Button
+                android:id="@+id/BTExportProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/export_profile" />
+
+            <Button
+                android:id="@+id/BTImportProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/import_profile_bundle" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

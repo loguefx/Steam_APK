@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="window_background_color">#fafafa</color>
+    <color name="colorPrimary">#607d8b</color>
+    <color name="colorPrimaryDark">#455a64</color>
+    <color name="colorAccent">#0288d1</color>
+    <!-- Game Hub style dark theme -->
+    <color name="gamehub_background">#121212</color>
+    <color name="gamehub_surface">#1e1e1e</color>
+    <color name="gamehub_card">#2a2a2a</color>
+    <color name="gamehub_text_primary">#ffffff</color>
+    <color name="gamehub_text_secondary">#b0b0b0</color>
+    <color name="gamehub_accent">#1b9dd3</color>
+    <color name="gamehub_toolbar">#1a1a1a</color>
+</resources>
