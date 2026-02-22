@@ -39,13 +39,20 @@ android {
     }
 }
 
-// Workaround: MergeNativeLibs sees duplicate libFLAC.so (jniLibs + cxx). Delete cxx copy before merge runs.
+// Workaround: MergeNativeLibs sees duplicates for jniLibs + cxx (midihandler IMPORTED libs). Remove cxx copies before merge.
 afterEvaluate {
-    def removeDup = tasks.register('removeDuplicateLibFlacDebug') {
+    def removeDup = tasks.register('removeDuplicateNativeLibsDebug') {
         doLast {
             def dir = file("${buildDir}/intermediates/cxx")
-            if (dir.exists()) {
-                fileTree(dir) { include '**/obj/arm64-v8a/libFLAC.so' }.each { it.delete() }
+            if (!dir.exists()) return
+            def jniLibsOnly = [
+                'libc++_shared.so', 'libFLAC.so', 'libfluidsynth.so', 'libfluidsynth-assetloader.so',
+                'libgio-2.0.so', 'libglib-2.0.so', 'libgmodule-2.0.so', 'libgobject-2.0.so', 'libgthread-2.0.so',
+                'libinstpatch-1.0.so', 'liboboe.so', 'libogg.so', 'libopus.so', 'libpcre.so', 'libpcreposix.so',
+                'libsndfile.so', 'libvorbis.so', 'libvorbisenc.so', 'libvorbisfile.so'
+            ]
+            fileTree(dir) { include '**/obj/arm64-v8a/*.so' }.each { f ->
+                if (f.name in jniLibsOnly) f.delete()
             }
         }
     }
