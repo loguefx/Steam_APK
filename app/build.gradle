@@ -39,14 +39,18 @@ android {
     }
 }
 
-// Workaround: packagingOptions pickFirst is ignored by MergeNativeLibs in AGP 7.2. Remove duplicate from cxx so only jniLibs copy is merged.
+// Workaround: MergeNativeLibs sees duplicate libFLAC.so (jniLibs + cxx). Delete cxx copy before merge runs.
 afterEvaluate {
-    tasks.findByName('mergeDebugNativeLibs')?.doFirst {
-        def dir = file("${buildDir}/intermediates/cxx")
-        if (dir.exists()) {
-            fileTree(dir) { include '**/obj/arm64-v8a/libFLAC.so' }.each { it.delete() }
+    def removeDup = tasks.register('removeDuplicateLibFlacDebug') {
+        doLast {
+            def dir = file("${buildDir}/intermediates/cxx")
+            if (dir.exists()) {
+                fileTree(dir) { include '**/obj/arm64-v8a/libFLAC.so' }.each { it.delete() }
+            }
         }
     }
+    tasks.named('mergeDebugNativeLibs').configure { it.dependsOn(removeDup) }
+    tasks.named('externalNativeBuildDebug').configure { removeDup.get().mustRunAfter(it) }
 }
 
 dependencies {
