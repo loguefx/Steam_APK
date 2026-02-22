@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -30,6 +31,8 @@ public class LaunchGateActivity extends AppCompatActivity {
     private SteamAuthPrefs steamAuthPrefs;
     private WebView webView;
     private ProgressBar progressBar;
+    /** Prevents handling the same callback twice and ensures we leave to MainActivity once. */
+    private boolean callbackHandled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +59,18 @@ public class LaunchGateActivity extends AppCompatActivity {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
+            private void tryHandleCallback(String url) {
+                if (url == null || !url.startsWith("gamehub-open://steam/callback") || callbackHandled) return;
+                callbackHandled = true;
+                webView.setVisibility(View.GONE);
+                handleSteamCallback(url);
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 if (url.startsWith("gamehub-open://steam/callback")) {
-                    handleSteamCallback(url);
+                    tryHandleCallback(url);
                     return true;
                 }
                 return false;
@@ -70,7 +80,7 @@ public class LaunchGateActivity extends AppCompatActivity {
             @SuppressWarnings("deprecation")
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url != null && url.startsWith("gamehub-open://steam/callback")) {
-                    handleSteamCallback(url);
+                    tryHandleCallback(url);
                     return true;
                 }
                 return false;
@@ -78,8 +88,24 @@ public class LaunchGateActivity extends AppCompatActivity {
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if (url != null && url.startsWith("gamehub-open://steam/callback")) {
-                    handleSteamCallback(url);
+                tryHandleCallback(url);
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                if (failingUrl != null && failingUrl.startsWith("gamehub-open://steam/callback")) {
+                    tryHandleCallback(failingUrl);
+                }
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame() && request.getUrl() != null) {
+                    String url = request.getUrl().toString();
+                    if (url.startsWith("gamehub-open://steam/callback")) {
+                        tryHandleCallback(url);
+                    }
                 }
             }
         });
@@ -104,7 +130,9 @@ public class LaunchGateActivity extends AppCompatActivity {
             steamAuthPrefs.setSignedIn(steamId, null);
             startMainAndFinish();
         } else {
+            callbackHandled = false;
             Toast.makeText(this, R.string.steam_sign_in_failed, Toast.LENGTH_SHORT).show();
+            webView.setVisibility(View.VISIBLE);
             webView.loadUrl(STEAM_OPENID_URL);
         }
     }
