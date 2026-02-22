@@ -28,6 +28,10 @@ android {
 
     ndkVersion '22.1.7171670'
 
+    packagingOptions {
+        pickFirst 'lib/arm64-v8a/libFLAC.so'
+    }
+
     externalNativeBuild {
         cmake {
             path 'src/main/cpp/CMakeLists.txt'
