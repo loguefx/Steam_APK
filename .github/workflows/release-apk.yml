@@ -21,7 +21,10 @@ jobs:
 
       - name: Fetch OpenXR-SDK
         run: |
+          git submodule deinit -f app/src/main/cpp/OpenXR-SDK 2>/dev/null || true
+          rm -rf .git/modules/app 2>/dev/null || true
           rm -f .gitmodules app/.gitmodules
+          git rm --cached app/src/main/cpp/OpenXR-SDK 2>/dev/null || true
           rm -rf app/src/main/cpp/OpenXR-SDK
           for i in 1 2 3; do
             git clone --depth 1 https://github.com/KhronosGroup/OpenXR-SDK.git app/src/main/cpp/OpenXR-SDK && break
