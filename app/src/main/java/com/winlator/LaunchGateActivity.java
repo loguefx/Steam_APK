@@ -67,8 +67,18 @@ public class LaunchGateActivity extends AppCompatActivity {
             }
 
             @Override
+            @SuppressWarnings("deprecation")
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url != null && url.startsWith("gamehub-open://steam/callback")) {
+                    handleSteamCallback(url);
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if (url.startsWith("gamehub-open://steam/callback")) {
+                if (url != null && url.startsWith("gamehub-open://steam/callback")) {
                     handleSteamCallback(url);
                 }
             }
