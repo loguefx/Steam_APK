@@ -48,10 +48,11 @@ public class LaunchGateActivity extends AppCompatActivity {
         return url.substring(0, 180) + "...(len=" + url.length() + ")";
     }
 
-    /** Build OpenID URL with https return_to (Steam rejects custom schemes like gamehub-open). */
+    /** Build OpenID URL with https return_to (Steam rejects custom schemes). Realm = origin only (no trailing path). */
     private String buildSteamOpenIdUrl() {
-        String returnTo = getString(R.string.steam_openid_return_to);
-        String realm = returnTo.replaceFirst("/[^/]*$", "/");
+        String returnTo = getString(R.string.steam_openid_return_to).split("\\?")[0];
+        String realm = returnTo.replaceFirst("/[^/]*$", ""); // e.g. https://example.github.io/Steam_APK
+        if (realm.endsWith("/")) realm = realm.substring(0, realm.length() - 1);
         try {
             return "https://steamcommunity.com/openid/login?" +
                 "openid.return_to=" + java.net.URLEncoder.encode(returnTo, "UTF-8") +
@@ -127,9 +128,15 @@ public class LaunchGateActivity extends AppCompatActivity {
 
             private void tryHandleCallback(String url) {
                 if (url == null) return;
-                boolean isHttpsCallback = url.startsWith(getHttpsCallbackBase()) && url.contains("openid.claimed_id");
+                boolean isHttpsCallback = url.startsWith(getHttpsCallbackBase());
                 boolean isCustomScheme = url.startsWith("gamehub-open://steam/callback");
                 if (!isHttpsCallback && !isCustomScheme) return;
+                if (url.contains("openid.mode=error")) {
+                    dlog("tryHandleCallback: Steam error response, not loading page");
+                    handleSteamErrorCallback(url);
+                    return;
+                }
+                if (!url.contains("openid.claimed_id")) return;
                 dlog("tryHandleCallback: callback url received (https=" + isHttpsCallback + ")");
                 if (callbackHandled) {
                     dlog("tryHandleCallback: already handled, skip");
@@ -145,7 +152,7 @@ public class LaunchGateActivity extends AppCompatActivity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
                 dlog("shouldOverrideUrlLoading(request): " + truncateUrl(url));
-                if (url.startsWith(getHttpsCallbackBase()) && url.contains("openid.claimed_id")) {
+                if (url.startsWith(getHttpsCallbackBase())) {
                     tryHandleCallback(url);
                     return true;
                 }
@@ -160,7 +167,7 @@ public class LaunchGateActivity extends AppCompatActivity {
             @SuppressWarnings("deprecation")
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 dlog("shouldOverrideUrlLoading(string): " + truncateUrl(url));
-                if (url != null && url.startsWith(getHttpsCallbackBase()) && url.contains("openid.claimed_id")) {
+                if (url != null && url.startsWith(getHttpsCallbackBase())) {
                     tryHandleCallback(url);
                     return true;
                 }
@@ -199,6 +206,23 @@ public class LaunchGateActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void handleSteamErrorCallback(String url) {
+        String message = getString(R.string.steam_sign_in_failed);
+        try {
+            int idx = url.indexOf("openid.error=");
+            if (idx >= 0) {
+                String rest = url.substring(idx + 13);
+                int end = rest.indexOf("&");
+                String err = end >= 0 ? rest.substring(0, end) : rest;
+                message = java.net.URLDecoder.decode(err.replace("+", " "), "UTF-8");
+            }
+        } catch (Exception ignored) {}
+        dlog("handleSteamErrorCallback: " + message);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        webView.setVisibility(View.VISIBLE);
+        webView.loadUrl(buildSteamOpenIdUrl());
     }
 
     private void handleSteamCallback(String url) {
