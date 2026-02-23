@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         else {
             int selectedMenuItemId = intent.getIntExtra("selected_menu_item_id", 0);
-            int menuItemId = selectedMenuItemId > 0 ? selectedMenuItemId : R.id.main_menu_steam_library;
+            int menuItemId = selectedMenuItemId > 0 ? selectedMenuItemId : R.id.main_menu_home;
 
             actionBar.setHomeAsUpIndicator(R.drawable.icon_action_bar_menu);
             onNavigationItemSelected(navigationView.getMenu().findItem(menuItemId));
@@ -106,14 +106,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
         FragmentManager fragmentManager = getSupportFragmentManager();
-        List<Fragment> fragments = fragmentManager.getFragments();
-        for (Fragment fragment : fragments) {
-            if (fragment instanceof ContainersFragment && fragment.isVisible()) {
-                finish();
-                return;
-            }
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+            fragmentManager.popBackStack();
+            return;
         }
-        show(new ContainersFragment());
+        show(new HomeFragment());
+    }
+
+    /** Called by HomeFragment (and others) to navigate to another screen without drawer. */
+    public void showFragment(Fragment fragment) {
+        show(fragment);
     }
 
     public void setOpenFileCallback(Callback<Uri> openFileCallback) {
@@ -152,14 +154,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         switch (item.getItemId()) {
+            case R.id.main_menu_home:
+                show(new HomeFragment());
+                break;
             case R.id.main_menu_steam_library:
                 show(new SteamLibraryFragment());
                 break;
             case R.id.main_menu_shortcuts:
                 show(new ShortcutsFragment());
-                break;
-            case R.id.main_menu_containers:
-                show(new ContainersFragment());
                 break;
             case R.id.main_menu_input_controls:
                 show(new InputControlsFragment(selectedProfileId));

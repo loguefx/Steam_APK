@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Simplified Steam-style icon (circle + steam curves) for Home tile. Tint with gamehub_text_primary. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,2A10,10 0,0 1,22 12A10,10 0,0 1,12 22A10,10 0,0 1,2 12A10,10 0,0 1,12 2Z"/>
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:pathData="M7,9 Q12,6 17,9"
+        android:fillColor="@android:color/transparent"/>
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:pathData="M7,15 Q12,18 17,15"
+        android:fillColor="@android:color/transparent"/>
+</vector>

@@ -19,6 +19,8 @@
     <string name="steam_play">Play</string>
     <string name="steam_playtime">%1$d hrs</string>
     <string name="steam_need_container">Add a container and install Steam in it, then try again.</string>
+    <string name="default_container_name">Default</string>
+    <string name="preparing_environment_failed">Preparing game environment failed. Please try again.</string>
     <string name="steam_discover">Discover</string>
     <string name="steam_find_games">Store</string>
     <string name="steam_recently_played">Recently played</string>
@@ -31,6 +33,9 @@
     <string name="controller_lb">LB</string>
     <string name="controller_rb">RB</string>
     <string name="controller_menu">Menu</string>
+    <string name="home">Home</string>
+    <string name="home_my">My</string>
+    <string name="steam_tile_description">Steam: View and manage all games under your current Steam account</string>
     <string name="device_title">Device</string>
     <string name="device_center">Device center</string>
     <string name="my_device">My device</string>
