@@ -7,6 +7,8 @@
     <string name="sign_out">Sign out</string>
     <string name="steam_library">My Games</string>
     <string name="steam_library_empty">No games or API key missing. Add Steam Web API key in Settings.</string>
+    <string name="steam_library_no_games">No games in your library.</string>
+    <string name="steam_library_no_key">Add Steam Web API key in Settings, or set STEAM_WEB_API_KEY when building.</string>
     <string name="steam_api_key">Steam Web API key</string>
     <string name="steam_api_key_summary">Get one at steamcommunity.com/dev/apikey to see your library</string>
     <string name="steam_play">Play</string>

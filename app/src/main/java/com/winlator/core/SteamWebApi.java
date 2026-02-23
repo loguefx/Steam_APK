@@ -36,10 +36,12 @@ public final class SteamWebApi {
     /** Fetch owned games. Returns empty list on error or missing key. */
     public static List<Game> getOwnedGames(String apiKey, String steamId) {
         List<Game> out = new ArrayList<>();
-        if (apiKey == null || apiKey.trim().isEmpty() || steamId == null || steamId.trim().isEmpty())
-            return out;
+        if (apiKey == null || apiKey.trim().isEmpty()) return out;
+        if (steamId == null || steamId.trim().isEmpty()) return out;
+        String numericId = steamId.trim().replaceAll("[^0-9]", "");
+        if (numericId.isEmpty()) return out;
         try {
-            String u = BASE + "/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey.trim() + "&steamid=" + steamId.trim() + "&format=json&include_appinfo=1";
+            String u = BASE + "/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey.trim() + "&steamid=" + numericId + "&format=json&include_appinfo=1";
             HttpURLConnection conn = (HttpURLConnection) new URL(u).openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(10000);
