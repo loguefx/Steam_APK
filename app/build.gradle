@@ -9,6 +9,11 @@ android {
         targetSdkVersion 28
         versionCode 16
         versionName "7.1"
+        // Optional: set STEAM_WEB_API_KEY in gradle.properties (or -P) so the app can fetch library without user entering a key.
+        buildConfigField "String", "STEAM_WEB_API_KEY", "\"${project.findProperty('STEAM_WEB_API_KEY') ?: ''}\""
+    }
+    buildFeatures {
+        buildConfig true
     }
 
     buildTypes {
@@ -28,11 +33,36 @@ android {
 
     ndkVersion '22.1.7171670'
 
+    packagingOptions {
+        pickFirst 'lib/arm64-v8a/libFLAC.so'  // resolve duplicate from jniLibs + CMake
+    }
+
     externalNativeBuild {
         cmake {
             path 'src/main/cpp/CMakeLists.txt'
         }
     }
+}
+
+// Workaround: MergeNativeLibs sees duplicates for jniLibs + cxx (midihandler IMPORTED libs). Remove cxx copies before merge.
+afterEvaluate {
+    def removeDup = tasks.register('removeDuplicateNativeLibsDebug') {
+        doLast {
+            def dir = file("${buildDir}/intermediates/cxx")
+            if (!dir.exists()) return
+            def jniLibsOnly = [
+                'libc++_shared.so', 'libFLAC.so', 'libfluidsynth.so', 'libfluidsynth-assetloader.so',
+                'libgio-2.0.so', 'libglib-2.0.so', 'libgmodule-2.0.so', 'libgobject-2.0.so', 'libgthread-2.0.so',
+                'libinstpatch-1.0.so', 'liboboe.so', 'libogg.so', 'libopus.so', 'libpcre.so', 'libpcreposix.so',
+                'libsndfile.so', 'libvorbis.so', 'libvorbisenc.so', 'libvorbisfile.so'
+            ]
+            fileTree(dir) { include '**/obj/arm64-v8a/*.so' }.each { f ->
+                if (f.name in jniLibsOnly) f.delete()
+            }
+        }
+    }
+    tasks.named('mergeDebugNativeLibs').configure { it.dependsOn(removeDup) }
+    tasks.named('externalNativeBuildDebug').configure { removeDup.get().mustRunAfter(it) }
 }
 
 dependencies {

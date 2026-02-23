@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Steam sign-in callback</title>
+  <script>
+    if (window.location.search) {
+      window.location.replace('gamehub-open://steam/callback' + window.location.search);
+    }
+  </script>
+</head>
+<body>
+  <p>Redirecting back to app…</p>
+  <p>If nothing happens, open the Steam APK app again.</p>
+</body>
+</html>

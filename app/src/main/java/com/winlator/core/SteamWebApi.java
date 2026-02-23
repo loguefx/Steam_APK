@@ -7,12 +7,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Steam Web API: GetOwnedGames.
- * Requires API key from https://steamcommunity.com/dev/apikey
+ * Can use either a direct API key or a backend URL that proxies the request (key stays on server).
  */
 public final class SteamWebApi {
     private static final String BASE = "https://api.steampowered.com";
@@ -36,10 +37,12 @@ public final class SteamWebApi {
     /** Fetch owned games. Returns empty list on error or missing key. */
     public static List<Game> getOwnedGames(String apiKey, String steamId) {
         List<Game> out = new ArrayList<>();
-        if (apiKey == null || apiKey.trim().isEmpty() || steamId == null || steamId.trim().isEmpty())
-            return out;
+        if (apiKey == null || apiKey.trim().isEmpty()) return out;
+        if (steamId == null || steamId.trim().isEmpty()) return out;
+        String numericId = steamId.trim().replaceAll("[^0-9]", "");
+        if (numericId.isEmpty()) return out;
         try {
-            String u = BASE + "/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey.trim() + "&steamid=" + steamId.trim() + "&format=json&include_appinfo=1";
+            String u = BASE + "/IPlayerService/GetOwnedGames/v0001/?key=" + apiKey.trim() + "&steamid=" + numericId + "&format=json&include_appinfo=1";
             HttpURLConnection conn = (HttpURLConnection) new URL(u).openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(10000);
@@ -48,6 +51,53 @@ public final class SteamWebApi {
             if (code != 200) return out;
             StringBuilder sb = new StringBuilder();
             try (BufferedReader r = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                String line;
+                while ((line = r.readLine()) != null) sb.append(line);
+            }
+            JSONObject root = new JSONObject(sb.toString());
+            JSONObject response = root.optJSONObject("response");
+            if (response == null) return out;
+            JSONArray games = response.optJSONArray("games");
+            if (games == null) return out;
+            for (int i = 0; i < games.length(); i++) {
+                JSONObject g = games.optJSONObject(i);
+                if (g == null) continue;
+                int appid = g.optInt("appid", 0);
+                String name = g.optString("name", "");
+                long playtime = g.optLong("playtime_forever", 0);
+                String img = g.optString("img_logo_url", "");
+                out.add(new Game(appid, name, playtime, img));
+            }
+        } catch (Throwable t) {
+            // ignore
+        }
+        return out;
+    }
+
+    /**
+     * Fetch owned games via your backend. Backend holds the API key and calls Steam;
+     * app only sends steamid. Use this so the user never needs an API key.
+     * Backend should return JSON: { "response": { "games": [ { "appid", "name", "playtime_forever", "img_logo_url" }, ... ] } }
+     * (same shape as Steam's GetOwnedGames response).
+     */
+    public static List<Game> getOwnedGamesViaBackend(String backendUrl, String steamId) {
+        List<Game> out = new ArrayList<>();
+        if (backendUrl == null || backendUrl.trim().isEmpty()) return out;
+        if (steamId == null || steamId.trim().isEmpty()) return out;
+        String numericId = steamId.trim().replaceAll("[^0-9]", "");
+        if (numericId.isEmpty()) return out;
+        try {
+            String base = backendUrl.trim();
+            if (base.contains("?")) base += "&"; else base += "?";
+            String u = base + "steamid=" + java.net.URLEncoder.encode(numericId, StandardCharsets.UTF_8.name());
+            HttpURLConnection conn = (HttpURLConnection) new URL(u).openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(15000);
+            int code = conn.getResponseCode();
+            if (code != 200) return out;
+            StringBuilder sb = new StringBuilder();
+            try (BufferedReader r = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = r.readLine()) != null) sb.append(line);
             }

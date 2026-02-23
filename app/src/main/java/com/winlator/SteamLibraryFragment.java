@@ -3,7 +3,6 @@ package com.winlator;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -91,14 +90,38 @@ public class SteamLibraryFragment extends Fragment {
         refreshLayout.setRefreshing(true);
         executor.execute(() -> {
             SteamAuthPrefs prefs = new SteamAuthPrefs(requireContext());
-            String apiKey = prefs.getWebApiKey();
             String steamId = prefs.getSteamId();
-            List<SteamWebApi.Game> list = SteamWebApi.getOwnedGames(apiKey, steamId);
+            boolean hasSteamId = steamId != null && !steamId.trim().isEmpty();
+            String backendUrl = null;
+            try {
+                backendUrl = getString(R.string.steam_library_backend_url);
+            } catch (Exception ignored) { }
+            if (backendUrl != null) backendUrl = backendUrl.trim();
+            List<SteamWebApi.Game> list;
+            boolean hasKey;
+            if (backendUrl != null && !backendUrl.isEmpty() && hasSteamId) {
+                list = SteamWebApi.getOwnedGamesViaBackend(backendUrl, steamId);
+                hasKey = true;
+            } else {
+                String apiKey = prefs.getWebApiKey();
+                if (apiKey == null || apiKey.trim().isEmpty())
+                    apiKey = BuildConfig.STEAM_WEB_API_KEY != null ? BuildConfig.STEAM_WEB_API_KEY : "";
+                if (apiKey == null || apiKey.trim().isEmpty()) {
+                    try {
+                        apiKey = getString(R.string.steam_web_api_key_default);
+                    } catch (Exception ignored) { }
+                }
+                if (apiKey != null) apiKey = apiKey.trim();
+                hasKey = apiKey != null && !apiKey.trim().isEmpty() && !apiKey.contains("PASTE_YOUR");
+                list = SteamWebApi.getOwnedGames(apiKey, steamId);
+            }
             List<SteamWebApi.Game> recent = new ArrayList<>();
             for (SteamWebApi.Game g : list) if (g.playtimeMinutes > 0) recent.add(g);
             Collections.sort(recent, (a, b) -> Long.compare(b.playtimeMinutes, a.playtimeMinutes));
             if (recent.size() > RECENTLY_PLAYED_MAX) recent = recent.subList(0, RECENTLY_PLAYED_MAX);
             final List<SteamWebApi.Game> recentFinal = recent;
+            final boolean hasKeyFinal = hasKey;
+            final boolean hasSteamIdFinal = hasSteamId;
             requireActivity().runOnUiThread(() -> {
                 games = list;
                 recentlyPlayed = recentFinal;
@@ -107,7 +130,17 @@ public class SteamLibraryFragment extends Fragment {
                 labelRecentlyPlayed.setVisibility(recentlyPlayed.isEmpty() ? View.GONE : View.VISIBLE);
                 recentRecycler.setVisibility(recentlyPlayed.isEmpty() ? View.GONE : View.VISIBLE);
                 gameCountText.setText(String.valueOf(games.size()));
-                emptyText.setVisibility(games.isEmpty() ? View.VISIBLE : View.GONE);
+                if (games.isEmpty()) {
+                    emptyText.setVisibility(View.VISIBLE);
+                    if (!hasKeyFinal)
+                        emptyText.setText(R.string.steam_library_no_key);
+                    else if (!hasSteamIdFinal)
+                        emptyText.setText(R.string.steam_library_empty);
+                    else
+                        emptyText.setText(R.string.steam_library_no_games);
+                } else {
+                    emptyText.setVisibility(View.GONE);
+                }
                 refreshLayout.setRefreshing(false);
             });
         });
@@ -115,7 +148,10 @@ public class SteamLibraryFragment extends Fragment {
 
     private void openSteamStore() {
         try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.steam_store_url))));
+            Intent i = new Intent(requireContext(), SteamStoreActivity.class);
+            i.putExtra(SteamStoreActivity.EXTRA_URL, getString(R.string.steam_store_url));
+            i.putExtra(SteamStoreActivity.EXTRA_TITLE, getString(R.string.steam_find_games));
+            startActivity(i);
         } catch (Throwable t) {
             Toast.makeText(requireContext(), R.string.steam_find_games, Toast.LENGTH_SHORT).show();
         }
