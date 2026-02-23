@@ -887,7 +887,13 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         String args = "";
         if (shortcut != null) {
             String execArgs = shortcut.getExtra("execArgs");
-            execArgs = !execArgs.isEmpty() ? " "+execArgs : "";
+            if (!execArgs.isEmpty()) {
+                execArgs = execArgs.trim();
+                // Quote URL arguments (e.g. steam://install/440) so the shell/Windows passes one argument to the exe
+                execArgs = execArgs.contains("://") ? " \"" + execArgs + "\"" : " " + execArgs;
+            } else {
+                execArgs = "";
+            }
 
             if (shortcut.path.endsWith(".lnk")) {
                 args += "\""+shortcut.path+"\""+execArgs;

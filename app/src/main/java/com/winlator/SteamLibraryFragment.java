@@ -292,6 +292,7 @@ public class SteamLibraryFragment extends Fragment {
         File desktopFile = new File(desktopDir, safeName);
         String steamWinPath = container.getSteamRootWindowsPath() + "\\steam.exe";
         String displayName = name != null ? name : ("Install " + appId);
+        /* steam://install/APPID tells Steam to show the install dialog for that game (not -applaunch which launches). */
         String content = "[Desktop Entry]\nType=Application\nName=" + displayName + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=steam://install/" + appId + "\n";
         FileUtils.writeString(desktopFile, content);
         Intent intent = new Intent(fragment.requireActivity(), XServerDisplayActivity.class);
