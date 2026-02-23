@@ -55,12 +55,12 @@ public class LaunchGateActivity extends AppCompatActivity {
         if (realm.endsWith("/")) realm = realm.substring(0, realm.length() - 1);
         try {
             return "https://steamcommunity.com/openid/login?" +
-                "openid.return_to=" + java.net.URLEncoder.encode(returnTo, "UTF-8") +
-                "&openid.realm=" + java.net.URLEncoder.encode(realm, "UTF-8") +
-                "&openid.claimed_id=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Fid%2F" +
-                "&openid.identity=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Fid%2F" +
+                "openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0" +
                 "&openid.mode=checkid_setup" +
-                "&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0";
+                "&openid.return_to=" + java.net.URLEncoder.encode(returnTo, "UTF-8") +
+                "&openid.realm=" + java.net.URLEncoder.encode(realm, "UTF-8") +
+                "&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select" +
+                "&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select";
         } catch (java.io.UnsupportedEncodingException e) {
             return "";
         }
