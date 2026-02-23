@@ -45,6 +45,7 @@
     <string name="install_game_ready">Ready</string>
     <string name="available_storage">Available storage: %1$s</string>
     <string name="install_via_steam_message">Install this game through Steam in the container. Open Steam to go to the store page and install.</string>
+    <string name="install_from_steam_library">Install %1$s from your Steam Library.</string>
     <string name="steam_view_details">View details</string>
     <string name="controller_y_search">Y Search</string>
     <string name="controller_b_back">B Back</string>

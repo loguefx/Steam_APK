@@ -895,8 +895,12 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 execArgs = "";
             }
 
-            if (shortcut.path.endsWith(".lnk")) {
-                args += "\""+shortcut.path+"\""+execArgs;
+            if (shortcut.path.isEmpty() || shortcut.path.endsWith(".lnk")) {
+                if (shortcut.path.isEmpty()) {
+                    args += "\"wfm.exe\"";
+                } else {
+                    args += "\""+shortcut.path+"\""+execArgs;
+                }
             }
             else {
                 String exeDir = FileUtils.getDirname(shortcut.path);

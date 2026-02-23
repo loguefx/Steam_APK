@@ -72,7 +72,12 @@ public class Shortcut {
         this.name = FileUtils.getBasename(file.getPath());
         this.icon = icon;
         this.iconFile = iconFile;
-        this.path = StringUtils.unescape(execArgs.substring(execArgs.lastIndexOf("wine ") + 4));
+        int wineIdx = execArgs.indexOf("wine ");
+        if (wineIdx >= 0) {
+            this.path = StringUtils.unescape(execArgs.substring(wineIdx + 5).trim());
+        } else {
+            this.path = "";
+        }
         this.wmClass = wmClass;
 
         Container.checkObsoleteOrMissingProperties(extraData);

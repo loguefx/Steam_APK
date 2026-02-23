@@ -280,7 +280,10 @@ public class SteamLibraryFragment extends Fragment {
         fragment.requireActivity().startActivity(intent);
     }
 
-    /** Launch Steam in the container to install a game (steam://install/APPID). Then show Home. */
+    /**
+     * Launch Steam in the container with no game argument, so the user can install from Library.
+     * Avoids steam://install/ and -applaunch so Steam does not try to run an uninstalled game (which can crash).
+     */
     public static void launchSteamInstallGame(Fragment fragment, Container container, String appId, String name) {
         if (container == null || fragment.getActivity() == null || appId == null) return;
         if (fragment.getActivity() instanceof MainActivity) {
@@ -292,9 +295,14 @@ public class SteamLibraryFragment extends Fragment {
         File desktopFile = new File(desktopDir, safeName);
         String steamWinPath = container.getSteamRootWindowsPath() + "\\steam.exe";
         String displayName = name != null ? name : ("Install " + appId);
-        /* steam://install/APPID tells Steam to show the install dialog for that game (not -applaunch which launches). */
-        String content = "[Desktop Entry]\nType=Application\nName=" + displayName + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=steam://install/" + appId + "\n";
-        FileUtils.writeString(desktopFile, content);
+        /* No execArgs: just launch Steam so user can install the game from Library. */
+        String content = "[Desktop Entry]\nType=Application\nName=" + displayName + "\nExec=wine \"" + steamWinPath + "\"\n";
+        if (!FileUtils.writeString(desktopFile, content)) {
+            Toast.makeText(fragment.requireContext(), R.string.preparing_environment_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String gameName = name != null ? name : ("App " + appId);
+        Toast.makeText(fragment.requireContext(), fragment.getResources().getString(R.string.install_from_steam_library, gameName), Toast.LENGTH_LONG).show();
         Intent intent = new Intent(fragment.requireActivity(), XServerDisplayActivity.class);
         intent.putExtra("container_id", container.id);
         intent.putExtra("shortcut_path", desktopFile.getPath());
