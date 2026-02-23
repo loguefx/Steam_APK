@@ -17,12 +17,21 @@
     <!-- Or: one key for the whole app (developer sets once, all users share it). Get key at steamcommunity.com/dev/apikey Replace placeholder and rebuild. Users never add a key. -->
     <string name="steam_web_api_key_default">PASTE_YOUR_STEAM_WEB_API_KEY_HERE</string>
     <string name="steam_play">Play</string>
+    <string name="tile_action_play">A  Play</string>
+    <string name="tile_action_open">A  Open</string>
+    <string name="tile_action_create_container">A  Create container</string>
+    <string name="tile_action_install_steam">A  Install Steam</string>
+    <string name="tile_action_install">A  Install</string>
+    <string name="tile_action_safe_mode">A  Launch Safe Mode</string>
     <string name="steam_playtime">%1$d hrs</string>
     <string name="steam_need_container">Add a container and install Steam in it, then try again.</string>
     <string name="default_container_name">Default</string>
     <string name="preparing_environment_failed">Preparing game environment failed. Please try again.</string>
+    <string name="retry">Retry</string>
+    <string name="first_time_setup_title">Get the best experience</string>
+    <string name="first_time_setup_message">For best performance and compatibility on your device:\n\n• Open the menu and go to Cloud config to check for recommended settings for your device.\n\n• Use Performance (Translation params) to choose Compatibility, Stable, or Performance presets.\n\n• After a game crashes, the next launch automatically uses Safe mode once.</string>
     <string name="steam_discover">Discover</string>
-    <string name="steam_find_games">Store</string>
+    <string name="steam_find_games">Find games</string>
     <string name="steam_recently_played">Recently played</string>
     <string name="steam_all_games">All games</string>
     <string name="steam_game_time">Game time: %1$d min</string>
@@ -35,6 +44,7 @@
     <string name="controller_menu">Menu</string>
     <string name="home">Home</string>
     <string name="home_my">My</string>
+    <string name="account_not_signed_in">Not signed in</string>
     <string name="steam_tile_description">Steam: View and manage all games under your current Steam account</string>
     <string name="device_title">Device</string>
     <string name="device_center">Device center</string>
@@ -43,6 +53,7 @@
     <string name="controller_disconnected">Disconnected</string>
     <string name="no_controllers_connected">No controllers connected</string>
     <string name="steam_store_url">https://store.steampowered.com</string>
+    <string name="steam_store_search_url">https://store.steampowered.com/search/</string>
     <!-- Steam OpenID return_to: must be https (Steam rejects custom schemes). App intercepts this URL in WebView. -->
     <string name="steam_openid_return_to">https://loguefx.github.io/Steam_APK/steam-callback.html</string>
     <string name="emulator_performance">Performance</string>

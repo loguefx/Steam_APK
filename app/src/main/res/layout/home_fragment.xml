@@ -3,22 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gamehub_background"
+    android:background="@drawable/gamehub_background_gradient"
     android:orientation="vertical">
 
-    <!-- Top bar: LB | My | Discover | Find games | RB, search -->
+    <!-- 10-foot tab bar: pill buttons, 18sp (Game Hub spec) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="64dp"
         android:background="@color/gamehub_toolbar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp">
+        android:paddingHorizontal="20dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="8dp"
+            android:background="@drawable/gamehub_tab_hint_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
             android:text="@string/controller_lb"
             android:textColor="@color/gamehub_text_secondary"
             android:textSize="11sp" />
@@ -27,43 +29,49 @@
             android:id="@+id/TabMy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/gamehub_tab_pill_bg"
             android:focusable="true"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="12dp"
             android:text="@string/home_my"
             android:textColor="@color/gamehub_text_primary"
-            android:textSize="15sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/TabDiscover"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/gamehub_tab_pill_bg"
             android:focusable="true"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="12dp"
             android:text="@string/steam_discover"
             android:textColor="@color/gamehub_text_secondary"
-            android:textSize="15sp" />
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/TabFindGames"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/gamehub_tab_pill_bg"
             android:focusable="true"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="12dp"
             android:text="@string/steam_find_games"
             android:textColor="@color/gamehub_text_secondary"
-            android:textSize="15sp" />
+            android:textSize="18sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/gamehub_tab_hint_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
             android:text="@string/controller_rb"
             android:textColor="@color/gamehub_text_secondary"
             android:textSize="11sp" />
@@ -75,12 +83,12 @@
 
         <ImageView
             android:id="@+id/BtnSearch"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/controller_y_search"
             android:focusable="true"
-            android:padding="8dp"
+            android:padding="12dp"
             app:srcCompat="@android:drawable/ic_menu_search"
             app:tint="@color/gamehub_text_secondary" />
     </LinearLayout>
@@ -91,58 +99,120 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:padding="8dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:scrollbars="none" />
 
-    <!-- Controller hints bar -->
+    <!-- Bottom account strip (Game Hub): avatar, username, stats, Y Search, Menu -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@color/gamehub_surface"
+        android:layout_height="72dp"
+        android:background="#E61A1A1A"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="20dp">
+
+        <FrameLayout
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/gamehub_tab_pill_bg">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                app:srcCompat="@android:drawable/ic_menu_my_calendar"
+                app:tint="@color/gamehub_text_secondary" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="14dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/AccountStripUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gamehub_text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/BtnAccountSignOut"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="4dp"
+                    android:text="@string/sign_out"
+                    android:textColor="@color/gamehub_accent"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Y "
+                    android:textColor="@color/gamehub_accent"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/controller_y_search"
+                    android:textColor="@color/gamehub_text_secondary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/controller_menu"
+                    android:textColor="@color/gamehub_text_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="A "
             android:textColor="@color/gamehub_accent"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textSize="14sp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/steam_play"
             android:textColor="@color/gamehub_text_secondary"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
 
-        <View android:layout_width="24dp" android:layout_height="0dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Y "
-            android:textColor="@color/gamehub_accent"
-            android:textStyle="bold" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/controller_y_search"
-            android:textColor="@color/gamehub_text_secondary"
-            android:textSize="12sp" />
-
-        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+        <View android:layout_width="16dp" android:layout_height="0dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="B "
             android:textColor="@color/gamehub_accent"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textSize="14sp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/controller_b_back"
             android:textColor="@color/gamehub_text_secondary"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 </LinearLayout>

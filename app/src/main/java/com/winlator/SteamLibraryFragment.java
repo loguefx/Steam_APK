@@ -20,8 +20,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.winlator.contentdialog.ContentDialog;
 import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
+import com.winlator.core.Callback;
 import com.winlator.core.FileUtils;
 import com.winlator.core.SteamWebApi;
 
@@ -73,9 +75,9 @@ public class SteamLibraryFragment extends Fragment {
         recentRecycler.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         refreshLayout.setOnRefreshListener(this::loadLibrary);
 
-        root.findViewById(R.id.TabStore).setOnClickListener(v -> openSteamStore());
-        root.findViewById(R.id.BtnSearch).setOnClickListener(v -> openSteamStore());
-        root.findViewById(R.id.TabDiscover).setOnClickListener(v -> openSteamStore());
+        root.findViewById(R.id.TabStore).setOnClickListener(v -> openSteamStore(false));
+        root.findViewById(R.id.BtnSearch).setOnClickListener(v -> openSteamStore(false));
+        root.findViewById(R.id.TabDiscover).setOnClickListener(v -> openSteamStore(true));
         return root;
     }
 
@@ -122,10 +124,12 @@ public class SteamLibraryFragment extends Fragment {
             final List<SteamWebApi.Game> recentFinal = recent;
             final boolean hasKeyFinal = hasKey;
             final boolean hasSteamIdFinal = hasSteamId;
+            ContainerManager cmForAdapter = new ContainerManager(requireContext());
+            final boolean hasContainer = cmForAdapter.getDefaultContainer() != null;
             requireActivity().runOnUiThread(() -> {
                 games = list;
                 recentlyPlayed = recentFinal;
-                grid.setAdapter(new SteamGameAdapter(games, this::onPlayGame));
+                grid.setAdapter(new SteamGameAdapter(games, this::onPlayGame, hasContainer));
                 recentRecycler.setAdapter(new SteamRecentAdapter(recentlyPlayed, this::onPlayGame));
                 labelRecentlyPlayed.setVisibility(recentlyPlayed.isEmpty() ? View.GONE : View.VISIBLE);
                 recentRecycler.setVisibility(recentlyPlayed.isEmpty() ? View.GONE : View.VISIBLE);
@@ -146,11 +150,14 @@ public class SteamLibraryFragment extends Fragment {
         });
     }
 
-    private void openSteamStore() {
+    /** Discover = store front; Find games / Y Search = store search (Game Hub behavior). */
+    private void openSteamStore(boolean discover) {
         try {
             Intent i = new Intent(requireContext(), SteamStoreActivity.class);
-            i.putExtra(SteamStoreActivity.EXTRA_URL, getString(R.string.steam_store_url));
-            i.putExtra(SteamStoreActivity.EXTRA_TITLE, getString(R.string.steam_find_games));
+            i.putExtra(SteamStoreActivity.EXTRA_URL,
+                discover ? getString(R.string.steam_store_url) : getString(R.string.steam_store_search_url));
+            i.putExtra(SteamStoreActivity.EXTRA_TITLE,
+                discover ? getString(R.string.steam_discover) : getString(R.string.steam_find_games));
             startActivity(i);
         } catch (Throwable t) {
             Toast.makeText(requireContext(), R.string.steam_find_games, Toast.LENGTH_SHORT).show();
@@ -159,17 +166,36 @@ public class SteamLibraryFragment extends Fragment {
 
     private void onPlayGame(SteamWebApi.Game game) {
         ContainerManager cm = new ContainerManager(requireContext());
-        List<Container> containers = cm.getContainers();
-        if (containers == null || containers.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.steam_need_container, Toast.LENGTH_LONG).show();
+        Container container = cm.getDefaultContainer();
+        if (container == null) {
+            cm.getOrCreateDefaultContainerAsync(c -> {
+                if (c != null) {
+                    launchSteamGame(c, game);
+                } else {
+                    showPreparingFailedDialog(game);
+                }
+            });
             return;
         }
-        Container container = containers.get(0);
+        launchSteamGame(container, game);
+    }
+
+    /** Show dialog when container creation fails, with Retry button. */
+    private void showPreparingFailedDialog(SteamWebApi.Game game) {
+        ContentDialog dialog = new ContentDialog(requireContext());
+        dialog.setMessage(R.string.preparing_environment_failed);
+        dialog.getContentView().findViewById(R.id.BTConfirm).setContentDescription(getString(R.string.retry));
+        ((android.widget.Button) dialog.getContentView().findViewById(R.id.BTConfirm)).setText(R.string.retry);
+        dialog.findViewById(R.id.BTCancel).setVisibility(View.GONE);
+        dialog.setOnConfirmCallback(() -> onPlayGame(game));
+        dialog.show();
+    }
+
+    private void launchSteamGame(Container container, SteamWebApi.Game game) {
         File desktopDir = container.getDesktopDir();
         if (!desktopDir.isDirectory()) desktopDir.mkdirs();
         String safeName = "Steam " + game.appId + ".desktop";
         File desktopFile = new File(desktopDir, safeName);
-        // Windows path for Steam; execArgs in Extra Data for -applaunch
         String steamWinPath = "C:\\Program Files (x86)\\Steam\\steam.exe";
         String content = "[Desktop Entry]\nType=Application\nName=" + game.name + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=-applaunch " + game.appId + "\n";
         FileUtils.writeString(desktopFile, content);
@@ -182,10 +208,12 @@ public class SteamLibraryFragment extends Fragment {
     private static class SteamGameAdapter extends RecyclerView.Adapter<SteamGameAdapter.Holder> {
         private final List<SteamWebApi.Game> list;
         private final OnPlayListener onPlay;
+        private final boolean hasContainer;
 
-        SteamGameAdapter(List<SteamWebApi.Game> list, OnPlayListener onPlay) {
+        SteamGameAdapter(List<SteamWebApi.Game> list, OnPlayListener onPlay, boolean hasContainer) {
             this.list = list;
             this.onPlay = onPlay;
+            this.hasContainer = hasContainer;
         }
 
         @NonNull
@@ -203,6 +231,7 @@ public class SteamLibraryFragment extends Fragment {
             h.playtime.setVisibility(hrs > 0 ? View.VISIBLE : View.GONE);
             h.image.setImageDrawable(null);
             loadImage(h.image, g.headerUrl);
+            h.play.setText(h.itemView.getContext().getString(hasContainer ? R.string.steam_launch_game : R.string.tile_action_create_container));
             h.play.setOnClickListener(v -> onPlay.onPlay(g));
             h.itemView.setOnClickListener(v -> onPlay.onPlay(g));
         }

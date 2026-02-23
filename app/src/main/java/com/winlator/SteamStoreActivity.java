@@ -37,6 +37,7 @@ public class SteamStoreActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         WebView webView = findViewById(R.id.SteamStoreWebView);
+        webView.setBackgroundColor(0xFF121212);
         webView.setWebViewClient(new WebViewClient());
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);

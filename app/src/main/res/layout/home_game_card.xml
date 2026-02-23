@@ -1,34 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Game tile: full-bleed artwork, gradient overlay, title + primary action (10-foot UI). -->
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
+    android:layout_margin="8dp"
     android:focusable="true"
     android:clickable="true"
     android:foreground="?attr/selectableItemBackground"
     app:cardBackgroundColor="@color/gamehub_card"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:minHeight="160dp">
 
         <ImageView
             android:id="@+id/HomeGameImage"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="180dp"
             android:scaleType="centerCrop"
             android:contentDescription="@null"
             android:background="@color/gamehub_surface" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:background="@drawable/gamehub_tile_gradient" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/HomeGameName"
@@ -37,16 +44,22 @@
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:textColor="@color/gamehub_text_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:shadowColor="#80000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="2" />
 
             <TextView
+                android:id="@+id/HomeGameAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="A Launch"
-                android:textColor="@color/gamehub_text_secondary"
-                android:textSize="11sp" />
+                android:layout_marginTop="8dp"
+                android:text="@string/tile_action_play"
+                android:textColor="@color/gamehub_text_primary"
+                android:textSize="16sp"
+                android:alpha="0.95" />
         </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 </androidx.cardview.widget.CardView>

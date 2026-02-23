@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rounded background for LB/RB tab hints (Game Hub style) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/gamehub_surface" />
+    <corners android:radius="4dp" />
+</shape>
