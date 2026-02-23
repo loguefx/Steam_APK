@@ -93,6 +93,12 @@ public class SteamLibraryFragment extends Fragment {
             String apiKey = prefs.getWebApiKey();
             if (apiKey == null || apiKey.trim().isEmpty())
                 apiKey = BuildConfig.STEAM_WEB_API_KEY != null ? BuildConfig.STEAM_WEB_API_KEY : "";
+            if (apiKey == null || apiKey.trim().isEmpty()) {
+                try {
+                    apiKey = getString(R.string.steam_web_api_key_default);
+                } catch (Exception ignored) { }
+            }
+            if (apiKey != null) apiKey = apiKey.trim();
             String steamId = prefs.getSteamId();
             boolean hasKey = apiKey != null && !apiKey.trim().isEmpty();
             boolean hasSteamId = steamId != null && !steamId.trim().isEmpty();

@@ -8,9 +8,11 @@
     <string name="steam_library">My Games</string>
     <string name="steam_library_empty">No games or API key missing. Add Steam Web API key in Settings.</string>
     <string name="steam_library_no_games">No games in your library.</string>
-    <string name="steam_library_no_key">Add Steam Web API key in Settings, or set STEAM_WEB_API_KEY when building.</string>
+    <string name="steam_library_no_key">To load library automatically: add your key once in Settings, or set steam_web_api_key_default in strings.xml / STEAM_WEB_API_KEY when building. Get key: steamcommunity.com/dev/apikey</string>
     <string name="steam_api_key">Steam Web API key</string>
     <string name="steam_api_key_summary">Get one at steamcommunity.com/dev/apikey to see your library</string>
+    <!-- Option A: Paste your Steam Web API key here so the library loads automatically (no Settings step). Get key at https://steamcommunity.com/dev/apikey (e.g. use localhost as domain). Replace the placeholder below with your key. -->
+    <string name="steam_web_api_key_default">PASTE_YOUR_STEAM_WEB_API_KEY_HERE</string>
     <string name="steam_play">Play</string>
     <string name="steam_playtime">%1$d hrs</string>
     <string name="steam_need_container">Add a container and install Steam in it, then try again.</string>
