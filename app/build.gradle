@@ -9,6 +9,11 @@ android {
         targetSdkVersion 28
         versionCode 16
         versionName "7.1"
+        // Optional: set STEAM_WEB_API_KEY in gradle.properties (or -P) so the app can fetch library without user entering a key.
+        buildConfigField "String", "STEAM_WEB_API_KEY", "\"${project.findProperty('STEAM_WEB_API_KEY') ?: ''}\""
+    }
+    buildFeatures {
+        buildConfig true
     }
 
     buildTypes {

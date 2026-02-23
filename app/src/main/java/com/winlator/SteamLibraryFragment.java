@@ -92,6 +92,8 @@ public class SteamLibraryFragment extends Fragment {
         executor.execute(() -> {
             SteamAuthPrefs prefs = new SteamAuthPrefs(requireContext());
             String apiKey = prefs.getWebApiKey();
+            if (apiKey == null || apiKey.trim().isEmpty())
+                apiKey = BuildConfig.STEAM_WEB_API_KEY;
             String steamId = prefs.getSteamId();
             List<SteamWebApi.Game> list = SteamWebApi.getOwnedGames(apiKey, steamId);
             List<SteamWebApi.Game> recent = new ArrayList<>();

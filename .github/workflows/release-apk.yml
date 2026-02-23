@@ -66,8 +66,10 @@ jobs:
           sdkmanager "cmake;3.18.1"
 
       - name: Build APK
+        env:
+          STEAM_WEB_API_KEY: ${{ secrets.STEAM_WEB_API_KEY }}
         run: |
-          ./gradlew assembleDebug --no-daemon --stacktrace > build.log 2>&1
+          ./gradlew assembleDebug -PSTEAM_WEB_API_KEY="$STEAM_WEB_API_KEY" --no-daemon --stacktrace > build.log 2>&1
           EXIT=$?
           cat build.log
           echo "--- Last 150 lines of build.log (error usually at end) ---"
