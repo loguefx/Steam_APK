@@ -116,7 +116,13 @@ public class HomeFragment extends Fragment {
         SteamAuthPrefs prefs = new SteamAuthPrefs(requireContext());
         TextView username = root.findViewById(R.id.AccountStripUsername);
         String name = prefs.getDisplayName();
-        username.setText(name != null && !name.isEmpty() ? name : getString(R.string.account_not_signed_in));
+        if (name != null && !name.isEmpty()) {
+            username.setText(name);
+        } else if (prefs.isSignedIn() || (prefs.getSteamId() != null && !prefs.getSteamId().isEmpty())) {
+            username.setText(getString(R.string.account_signed_in));
+        } else {
+            username.setText(getString(R.string.account_not_signed_in));
+        }
         View signOut = root.findViewById(R.id.BtnAccountSignOut);
         signOut.setOnClickListener(v -> {
             prefs.signOut();

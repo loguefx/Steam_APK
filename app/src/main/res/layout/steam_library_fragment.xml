@@ -6,19 +6,21 @@
     android:background="@color/gamehub_background"
     android:orientation="vertical">
 
-    <!-- Top bar: LB | My | Discover | Store | RB, search, controller -->
+    <!-- Top bar: LB | My Games | Discover | Find games | RB, search -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="56dp"
         android:background="@color/gamehub_toolbar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp">
+        android:paddingHorizontal="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="8dp"
+            android:background="@drawable/gamehub_tab_hint_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
             android:text="@string/controller_lb"
             android:textColor="@color/gamehub_text_secondary"
             android:textSize="11sp" />
@@ -27,43 +29,49 @@
             android:id="@+id/TabMy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/gamehub_tab_pill_bg"
             android:focusable="true"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
             android:text="@string/steam_library"
             android:textColor="@color/gamehub_text_primary"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/TabDiscover"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/gamehub_tab_pill_bg"
             android:focusable="true"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
             android:text="@string/steam_discover"
             android:textColor="@color/gamehub_text_secondary"
-            android:textSize="15sp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/TabStore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/gamehub_tab_pill_bg"
             android:focusable="true"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
             android:text="@string/steam_find_games"
             android:textColor="@color/gamehub_text_secondary"
-            android:textSize="15sp" />
+            android:textSize="16sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/gamehub_tab_hint_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
             android:text="@string/controller_rb"
             android:textColor="@color/gamehub_text_secondary"
             android:textSize="11sp" />
@@ -75,20 +83,20 @@
 
         <ImageView
             android:id="@+id/BtnSearch"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/controller_y_search"
             android:focusable="true"
-            android:padding="8dp"
+            android:padding="10dp"
             app:srcCompat="@android:drawable/ic_menu_search"
             app:tint="@color/gamehub_text_secondary" />
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:contentDescription="@string/controller_menu"
-            android:padding="8dp"
+            android:padding="10dp"
             app:srcCompat="@android:drawable/ic_menu_my_calendar"
             app:tint="@color/gamehub_text_secondary" />
     </LinearLayout>
@@ -166,18 +174,19 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:clipToPadding="false"
-                android:padding="8dp" />
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp" />
         </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <!-- Controller hints bar -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@color/gamehub_surface"
+        android:layout_height="52dp"
+        android:background="@color/gamehub_card"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="20dp">
 
         <TextView
             android:layout_width="wrap_content"

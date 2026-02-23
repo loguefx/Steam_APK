@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -25,6 +26,7 @@ import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
 import com.winlator.core.FileUtils;
 import com.winlator.core.SteamWebApi;
+import com.winlator.core.StringUtils;
 import com.winlator.steam.InstalledSteamGame;
 import com.winlator.steam.InstalledSteamGamesRepository;
 
@@ -192,13 +194,40 @@ public class SteamLibraryFragment extends Fragment {
         launchSteamGame(container, game);
     }
 
-    /** Open Steam store page for a game so user can install it. Do not launch game. */
+    /** Show Game Hub–style install dialog; Install opens Steam store page for the game. */
     private void onDownloadGame(SteamWebApi.Game game) {
-        String url = "https://store.steampowered.com/app/" + game.appId + "/";
-        Intent i = new Intent(requireContext(), SteamStoreActivity.class);
-        i.putExtra(SteamStoreActivity.EXTRA_URL, url);
-        i.putExtra(SteamStoreActivity.EXTRA_TITLE, game.name);
-        startActivity(i);
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_install_game, null);
+        ImageView image = view.findViewById(R.id.InstallDialogImage);
+        TextView title = view.findViewById(R.id.InstallDialogTitle);
+        TextView status = view.findViewById(R.id.InstallDialogStatus);
+        TextView storage = view.findViewById(R.id.InstallDialogStorage);
+        TextView message = view.findViewById(R.id.InstallDialogMessage);
+        Button cancelBtn = view.findViewById(R.id.InstallDialogCancel);
+        Button installBtn = view.findViewById(R.id.InstallDialogConfirm);
+
+        title.setText(game.name);
+        status.setText(getString(R.string.install_game_ready));
+        long available = FileUtils.getAvailableInternalStorageSize();
+        storage.setText(getString(R.string.available_storage, StringUtils.formatBytes(available)));
+        message.setVisibility(View.VISIBLE);
+        message.setText(getString(R.string.install_via_steam_message));
+
+        SteamGameAdapter.loadImageStatic(image, game.headerUrl);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.ContentDialog)
+            .setView(view)
+            .create();
+
+        cancelBtn.setOnClickListener(v -> dialog.dismiss());
+        installBtn.setOnClickListener(v -> {
+            dialog.dismiss();
+            String url = "https://store.steampowered.com/app/" + game.appId + "/";
+            Intent i = new Intent(requireContext(), SteamStoreActivity.class);
+            i.putExtra(SteamStoreActivity.EXTRA_URL, url);
+            i.putExtra(SteamStoreActivity.EXTRA_TITLE, game.name);
+            startActivity(i);
+        });
+        dialog.show();
     }
 
     /** Show dialog when container creation fails, with Retry button. */

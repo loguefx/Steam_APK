@@ -31,7 +31,7 @@
                 android:id="@+id/TVTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/gamehub_dialog_text"
                 android:textStyle="bold"
                 android:textSize="18sp" />
         </LinearLayout>
@@ -44,7 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:textColor="@color/gamehub_text_primary"
+        android:textColor="@color/gamehub_dialog_text"
         android:layout_marginBottom="8dp"
         android:visibility="gone" />
 

@@ -327,6 +327,13 @@ public abstract class FileUtils {
         return totalBlocks * blockSize;
     }
 
+    /** Available space on internal storage (bytes). */
+    public static long getAvailableInternalStorageSize() {
+        File dataDir = Environment.getDataDirectory();
+        StatFs stat = new StatFs(dataDir.getPath());
+        return stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
+    }
+
     public static boolean isDirectory(Context context, String assetFile) {
         try {
             String[] files = context.getAssets().list(assetFile);

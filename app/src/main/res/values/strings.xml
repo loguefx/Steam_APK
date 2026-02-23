@@ -38,6 +38,11 @@
     <string name="steam_game_time">Game time: %1$d min</string>
     <string name="steam_launch_game">A Launch game</string>
     <string name="steam_download_game">A  Download</string>
+    <string name="install_game_dialog_title">Install</string>
+    <string name="install_game_computing">Computing…</string>
+    <string name="install_game_ready">Ready</string>
+    <string name="available_storage">Available storage: %1$s</string>
+    <string name="install_via_steam_message">Install this game through Steam in the container. Open Steam to go to the store page and install.</string>
     <string name="steam_view_details">View details</string>
     <string name="controller_y_search">Y Search</string>
     <string name="controller_b_back">B Back</string>
@@ -50,6 +55,7 @@
     <string name="open_steam_to_install">Open Steam to install games</string>
     <string name="install_steam_in_container">Install Steam in the container from Desktop, then open Steam from here.</string>
     <string name="account_not_signed_in">Not signed in</string>
+    <string name="account_signed_in">Signed in</string>
     <string name="steam_tile_description">Steam: View and manage all games under your current Steam account</string>
     <string name="device_title">Device</string>
     <string name="device_center">Device center</string>
@@ -109,6 +115,7 @@
     <string name="updating_system_files">Updating System Files...</string>
     <string name="starting_up">Starting up...</string>
     <string name="unable_to_install_system_files">Unable to install system files</string>
+    <string name="system_files_asset_missing">System files asset not found. Reinstall the app or ensure imagefs.txz is included.</string>
     <string name="keyboard">Keyboard</string>
     <string name="toggle_fullscreen">Toggle Fullscreen</string>
     <string name="exit">Exit</string>

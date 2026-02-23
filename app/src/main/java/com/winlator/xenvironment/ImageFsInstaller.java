@@ -47,6 +47,12 @@ public abstract class ImageFsInstaller {
         ImageFs imageFs = ImageFs.find(activity);
         final File rootDir = imageFs.getRootDir();
 
+        final long assetSize = FileUtils.getSize(activity, "imagefs.txz");
+        if (assetSize <= 0) {
+            AppUtils.showToast(activity, R.string.system_files_asset_missing);
+            return;
+        }
+
         SettingsFragment.resetBox86_64Version(activity);
 
         final DownloadProgressDialog dialog = new DownloadProgressDialog(activity);
@@ -54,7 +60,7 @@ public abstract class ImageFsInstaller {
         Executors.newSingleThreadExecutor().execute(() -> {
             clearRootDir(rootDir);
             final byte compressionRatio = 22;
-            final long contentLength = (long)(FileUtils.getSize(activity, "imagefs.txz") * (100.0f / compressionRatio));
+            final long contentLength = Math.max(1, (long)(assetSize * (100.0f / compressionRatio)));
             AtomicLong totalSizeRef = new AtomicLong();
 
             boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, activity, "imagefs.txz", rootDir, (file, size) -> {

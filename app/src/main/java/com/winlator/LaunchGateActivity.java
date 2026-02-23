@@ -244,7 +244,7 @@ public class LaunchGateActivity extends AppCompatActivity {
 
         if (steamId != null && !steamId.isEmpty()) {
             dlog("handleSteamCallback: success steamId=" + steamId + " -> MainActivity");
-            steamAuthPrefs.setSignedIn(steamId, null);
+            steamAuthPrefs.setSignedIn(steamId, getString(R.string.account_signed_in));
             startMainAndFinish();
         } else {
             dlog("handleSteamCallback: failed to parse steamId, retry");
