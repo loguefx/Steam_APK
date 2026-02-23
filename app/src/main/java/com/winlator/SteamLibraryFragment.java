@@ -194,14 +194,14 @@ public class SteamLibraryFragment extends Fragment {
         launchSteamGame(container, game);
     }
 
-    /** Show Game Hub–style install dialog; Install opens Steam store page for the game. */
+    /** Install dialog: Install starts Steam install in container and goes to Home. */
     private void onDownloadGame(SteamWebApi.Game game) {
         View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_install_game, null);
         ImageView image = view.findViewById(R.id.InstallDialogImage);
         TextView title = view.findViewById(R.id.InstallDialogTitle);
         TextView status = view.findViewById(R.id.InstallDialogStatus);
         TextView storage = view.findViewById(R.id.InstallDialogStorage);
-        TextView message = view.findViewById(R.id.InstallDialogMessage);
+        View message = view.findViewById(R.id.InstallDialogMessage);
         Button cancelBtn = view.findViewById(R.id.InstallDialogCancel);
         Button installBtn = view.findViewById(R.id.InstallDialogConfirm);
 
@@ -209,8 +209,7 @@ public class SteamLibraryFragment extends Fragment {
         status.setText(getString(R.string.install_game_ready));
         long available = FileUtils.getAvailableInternalStorageSize();
         storage.setText(getString(R.string.available_storage, StringUtils.formatBytes(available)));
-        message.setVisibility(View.VISIBLE);
-        message.setText(getString(R.string.install_via_steam_message));
+        message.setVisibility(View.GONE);
 
         SteamGameAdapter.loadImageStatic(image, game.headerUrl);
 
@@ -221,11 +220,19 @@ public class SteamLibraryFragment extends Fragment {
         cancelBtn.setOnClickListener(v -> dialog.dismiss());
         installBtn.setOnClickListener(v -> {
             dialog.dismiss();
-            String url = "https://store.steampowered.com/app/" + game.appId + "/";
-            Intent i = new Intent(requireContext(), SteamStoreActivity.class);
-            i.putExtra(SteamStoreActivity.EXTRA_URL, url);
-            i.putExtra(SteamStoreActivity.EXTRA_TITLE, game.name);
-            startActivity(i);
+            ContainerManager cm = new ContainerManager(requireContext());
+            Container container = cm.getDefaultContainer();
+            if (container == null) {
+                cm.getOrCreateDefaultContainerAsync(c -> {
+                    if (c != null) {
+                        launchSteamInstallGame(SteamLibraryFragment.this, c, String.valueOf(game.appId), game.name);
+                    } else {
+                        Toast.makeText(requireContext(), R.string.preparing_environment_failed, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                launchSteamInstallGame(this, container, String.valueOf(game.appId), game.name);
+            }
         });
         dialog.show();
     }
@@ -266,6 +273,26 @@ public class SteamLibraryFragment extends Fragment {
         File desktopFile = new File(desktopDir, "Steam.desktop");
         String steamWinPath = container.getSteamRootWindowsPath() + "\\steam.exe";
         String content = "[Desktop Entry]\nType=Application\nName=Steam\nExec=wine \"" + steamWinPath + "\"\n";
+        FileUtils.writeString(desktopFile, content);
+        Intent intent = new Intent(fragment.requireActivity(), XServerDisplayActivity.class);
+        intent.putExtra("container_id", container.id);
+        intent.putExtra("shortcut_path", desktopFile.getPath());
+        fragment.requireActivity().startActivity(intent);
+    }
+
+    /** Launch Steam in the container to install a game (steam://install/APPID). Then show Home. */
+    public static void launchSteamInstallGame(Fragment fragment, Container container, String appId, String name) {
+        if (container == null || fragment.getActivity() == null || appId == null) return;
+        if (fragment.getActivity() instanceof MainActivity) {
+            ((MainActivity) fragment.requireActivity()).showFragment(new HomeFragment());
+        }
+        File desktopDir = container.getDesktopDir();
+        if (!desktopDir.isDirectory()) desktopDir.mkdirs();
+        String safeName = "Steam Install " + appId + ".desktop";
+        File desktopFile = new File(desktopDir, safeName);
+        String steamWinPath = container.getSteamRootWindowsPath() + "\\steam.exe";
+        String displayName = name != null ? name : ("Install " + appId);
+        String content = "[Desktop Entry]\nType=Application\nName=" + displayName + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=steam://install/" + appId + "\n";
         FileUtils.writeString(desktopFile, content);
         Intent intent = new Intent(fragment.requireActivity(), XServerDisplayActivity.class);
         intent.putExtra("container_id", container.id);
