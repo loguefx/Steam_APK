@@ -6,12 +6,15 @@
     <string name="steam_sign_in_failed">Sign-in failed. Please try again.</string>
     <string name="sign_out">Sign out</string>
     <string name="steam_library">My Games</string>
-    <string name="steam_library_empty">No games or API key missing. Add Steam Web API key in Settings.</string>
+    <string name="steam_library_empty">Sign in with Steam to see your library.</string>
     <string name="steam_library_no_games">No games in your library.</string>
-    <string name="steam_library_no_key">To load library automatically: add your key once in Settings, or set steam_web_api_key_default in strings.xml / STEAM_WEB_API_KEY when building. Get key: steamcommunity.com/dev/apikey</string>
+    <!-- Shown only when app has no key/backend configured (developer build). End users of a proper build never see this. -->
+    <string name="steam_library_no_key">Library unavailable. The app needs a Steam API key or backend configured by the developer. Users do not add a key.</string>
     <string name="steam_api_key">Steam Web API key</string>
-    <string name="steam_api_key_summary">Get one at steamcommunity.com/dev/apikey to see your library</string>
-    <!-- Option A: Paste your Steam Web API key here so the library loads automatically (no Settings step). Get key at https://steamcommunity.com/dev/apikey (e.g. use localhost as domain). Replace the placeholder below with your key. -->
+    <string name="steam_api_key_summary">Optional override. Usually the app is built with a key or backend so users just sign in.</string>
+    <!-- Backend URL: hardcoded so all users get library after sign-in. Replace with your Worker URL if different. -->
+    <string name="steam_library_backend_url">https://noisy-sun-08fa.loguefx702.workers.dev</string>
+    <!-- Or: one key for the whole app (developer sets once, all users share it). Get key at steamcommunity.com/dev/apikey Replace placeholder and rebuild. Users never add a key. -->
     <string name="steam_web_api_key_default">PASTE_YOUR_STEAM_WEB_API_KEY_HERE</string>
     <string name="steam_play">Play</string>
     <string name="steam_playtime">%1$d hrs</string>

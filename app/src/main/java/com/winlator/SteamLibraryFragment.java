@@ -90,19 +90,31 @@ public class SteamLibraryFragment extends Fragment {
         refreshLayout.setRefreshing(true);
         executor.execute(() -> {
             SteamAuthPrefs prefs = new SteamAuthPrefs(requireContext());
-            String apiKey = prefs.getWebApiKey();
-            if (apiKey == null || apiKey.trim().isEmpty())
-                apiKey = BuildConfig.STEAM_WEB_API_KEY != null ? BuildConfig.STEAM_WEB_API_KEY : "";
-            if (apiKey == null || apiKey.trim().isEmpty()) {
-                try {
-                    apiKey = getString(R.string.steam_web_api_key_default);
-                } catch (Exception ignored) { }
-            }
-            if (apiKey != null) apiKey = apiKey.trim();
             String steamId = prefs.getSteamId();
-            boolean hasKey = apiKey != null && !apiKey.trim().isEmpty();
             boolean hasSteamId = steamId != null && !steamId.trim().isEmpty();
-            List<SteamWebApi.Game> list = SteamWebApi.getOwnedGames(apiKey, steamId);
+            String backendUrl = null;
+            try {
+                backendUrl = getString(R.string.steam_library_backend_url);
+            } catch (Exception ignored) { }
+            if (backendUrl != null) backendUrl = backendUrl.trim();
+            List<SteamWebApi.Game> list;
+            boolean hasKey;
+            if (backendUrl != null && !backendUrl.isEmpty() && hasSteamId) {
+                list = SteamWebApi.getOwnedGamesViaBackend(backendUrl, steamId);
+                hasKey = true;
+            } else {
+                String apiKey = prefs.getWebApiKey();
+                if (apiKey == null || apiKey.trim().isEmpty())
+                    apiKey = BuildConfig.STEAM_WEB_API_KEY != null ? BuildConfig.STEAM_WEB_API_KEY : "";
+                if (apiKey == null || apiKey.trim().isEmpty()) {
+                    try {
+                        apiKey = getString(R.string.steam_web_api_key_default);
+                    } catch (Exception ignored) { }
+                }
+                if (apiKey != null) apiKey = apiKey.trim();
+                hasKey = apiKey != null && !apiKey.trim().isEmpty() && !apiKey.contains("PASTE_YOUR");
+                list = SteamWebApi.getOwnedGames(apiKey, steamId);
+            }
             List<SteamWebApi.Game> recent = new ArrayList<>();
             for (SteamWebApi.Game g : list) if (g.playtimeMinutes > 0) recent.add(g);
             Collections.sort(recent, (a, b) -> Long.compare(b.playtimeMinutes, a.playtimeMinutes));
