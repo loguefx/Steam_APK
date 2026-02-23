@@ -22,6 +22,8 @@
     <string name="tile_action_open_steam">A  Open Steam</string>
     <string name="tile_action_create_container">A  Create container</string>
     <string name="tile_action_install_steam">A  Install Steam</string>
+    <string name="tile_action_my_games">A  My Games</string>
+    <string name="toast_install_steam_to_play">Install Steam in the container to play games from here.</string>
     <string name="tile_action_install">A  Install</string>
     <string name="tile_action_safe_mode">A  Launch Safe Mode</string>
     <string name="steam_playtime">%1$d hrs</string>

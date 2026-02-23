@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -87,6 +88,7 @@ public class HomeFragment extends Fragment {
         view.findViewById(R.id.TabDiscover).setOnClickListener(v -> openSteamStore(true));
         view.findViewById(R.id.TabFindGames).setOnClickListener(v -> openSteamStore(false));
         view.findViewById(R.id.BtnSearch).setOnClickListener(v -> openSteamStore(false));
+        view.findViewById(R.id.TabMyGames).setOnClickListener(v -> openMyGames());
         view.findViewById(R.id.TabMy).setSelected(true);
         updateAccountStrip(view);
 
@@ -184,8 +186,9 @@ public class HomeFragment extends Fragment {
                         homeEmptyState.setVisibility(installedGames.isEmpty() ? View.VISIBLE : View.GONE);
                         if (steamState == SteamRuntimeState.STEAM_READY) {
                             SteamLibraryFragment.launchSteamClient(HomeFragment.this, c);
-                        } else if (steamState == SteamRuntimeState.STEAM_NOT_INSTALLED) {
-                            showInstallSteamDialog(c);
+                        } else {
+                            openMyGames();
+                            Toast.makeText(requireContext(), R.string.toast_install_steam_to_play, Toast.LENGTH_SHORT).show();
                         }
                     });
                 });
@@ -193,11 +196,19 @@ public class HomeFragment extends Fragment {
             return;
         }
         if (steamState == SteamRuntimeState.STEAM_NOT_INSTALLED) {
-            showInstallSteamDialog(container);
+            openMyGames();
+            Toast.makeText(requireContext(), R.string.toast_install_steam_to_play, Toast.LENGTH_SHORT).show();
             return;
         }
         if (steamState == SteamRuntimeState.STEAM_READY && container != null) {
             SteamLibraryFragment.launchSteamClient(this, container);
+        }
+    }
+
+    /** Open the Steam library (My Games) screen so user can see owned games and use Download/Play. */
+    private void openMyGames() {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).showFragment(new SteamLibraryFragment());
         }
     }
 
@@ -294,7 +305,7 @@ public class HomeFragment extends Fragment {
                 if (hint != null) {
                     int resId;
                     if (steamState == SteamRuntimeState.STEAM_READY) resId = R.string.tile_action_open_steam;
-                    else if (steamState == SteamRuntimeState.STEAM_NOT_INSTALLED) resId = R.string.tile_action_install_steam;
+                    else if (steamState == SteamRuntimeState.STEAM_NOT_INSTALLED) resId = R.string.tile_action_my_games;
                     else resId = R.string.tile_action_create_container;
                     hint.setText(resId);
                 }

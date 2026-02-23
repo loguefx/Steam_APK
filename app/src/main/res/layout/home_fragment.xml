@@ -40,6 +40,19 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/TabMyGames"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/gamehub_tab_pill_bg"
+            android:focusable="true"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="12dp"
+            android:text="@string/steam_library"
+            android:textColor="@color/gamehub_text_secondary"
+            android:textSize="18sp" />
+
+        <TextView
             android:id="@+id/TabDiscover"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
