@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -142,6 +143,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         if (!isGenerateWineprefix()) {
             containerManager = new ContainerManager(this);
             container = containerManager.getContainerById(getIntent().getIntExtra("container_id", 0));
+            if (container == null) {
+                Toast.makeText(this, R.string.steam_need_container, Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
             containerManager.activateContainer(container);
 
             boolean wineprefixNeedsUpdate = container.getExtra("wineprefixNeedsUpdate").equals("t");

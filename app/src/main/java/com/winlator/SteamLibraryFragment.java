@@ -223,11 +223,14 @@ public class SteamLibraryFragment extends Fragment {
             ContainerManager cm = new ContainerManager(requireContext());
             Container container = cm.getDefaultContainer();
             if (container == null) {
+                Toast.makeText(requireContext(), R.string.creating_container, Toast.LENGTH_SHORT).show();
                 cm.getOrCreateDefaultContainerAsync(c -> {
                     if (c != null) {
-                        launchSteamInstallGame(SteamLibraryFragment.this, c, String.valueOf(game.appId), game.name);
+                        requireActivity().runOnUiThread(() ->
+                            launchSteamInstallGame(SteamLibraryFragment.this, c, String.valueOf(game.appId), game.name));
                     } else {
-                        Toast.makeText(requireContext(), R.string.preparing_environment_failed, Toast.LENGTH_SHORT).show();
+                        requireActivity().runOnUiThread(() ->
+                            Toast.makeText(requireContext(), R.string.preparing_environment_failed, Toast.LENGTH_SHORT).show());
                     }
                 });
             } else {
@@ -362,15 +365,10 @@ public class SteamLibraryFragment extends Fragment {
                 h.play.setOnClickListener(v -> onPlay.onPlay(g));
                 h.itemView.setOnClickListener(v -> onPlay.onPlay(g));
             } else {
-                h.play.setText(h.itemView.getContext().getString(hasContainer ? R.string.steam_download_game : R.string.tile_action_create_container));
-                h.play.setOnClickListener(v -> {
-                    if (hasContainer) onDownload.onDownload(g);
-                    else onPlay.onPlay(g);
-                });
-                h.itemView.setOnClickListener(v -> {
-                    if (hasContainer) onDownload.onDownload(g);
-                    else onPlay.onPlay(g);
-                });
+                /* Always show Download/Install; when no container, Install flow will create one and open Steam (never -applaunch). */
+                h.play.setText(h.itemView.getContext().getString(R.string.steam_download_game));
+                h.play.setOnClickListener(v -> onDownload.onDownload(g));
+                h.itemView.setOnClickListener(v -> onDownload.onDownload(g));
             }
         }
 
