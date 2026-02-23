@@ -23,9 +23,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.winlator.contentdialog.ContentDialog;
 import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
-import com.winlator.core.Callback;
 import com.winlator.core.FileUtils;
 import com.winlator.core.SteamWebApi;
+import com.winlator.steam.InstalledSteamGame;
+import com.winlator.steam.InstalledSteamGamesRepository;
 
 import java.io.File;
 import java.io.InputStream;
@@ -33,8 +34,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -47,8 +49,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 public class SteamLibraryFragment extends Fragment {
     private static final int GRID_COLUMNS = 2;
 
-    /** Used by SteamGameAdapter and SteamRecentAdapter for launch callback. */
+    /** Used by SteamGameAdapter for launch callback. */
     interface OnPlayListener { void onPlay(SteamWebApi.Game game); }
+    /** Used by SteamGameAdapter when game is not installed: open store page. */
+    interface OnDownloadListener { void onDownload(SteamWebApi.Game game); }
 
     private static final int RECENTLY_PLAYED_MAX = 10;
     private SwipeRefreshLayout refreshLayout;
@@ -125,12 +129,20 @@ public class SteamLibraryFragment extends Fragment {
             final boolean hasKeyFinal = hasKey;
             final boolean hasSteamIdFinal = hasSteamId;
             ContainerManager cmForAdapter = new ContainerManager(requireContext());
-            final boolean hasContainer = cmForAdapter.getDefaultContainer() != null;
+            Container defaultContainer = cmForAdapter.getDefaultContainer();
+            final boolean hasContainer = defaultContainer != null;
+            final Set<String> installedAppIds = new HashSet<>();
+            if (defaultContainer != null) {
+                InstalledSteamGamesRepository.Result installedResult = new InstalledSteamGamesRepository(defaultContainer).getInstalledGames();
+                for (InstalledSteamGame ig : installedResult.games) {
+                    installedAppIds.add(ig.appId);
+                }
+            }
             requireActivity().runOnUiThread(() -> {
                 games = list;
                 recentlyPlayed = recentFinal;
-                grid.setAdapter(new SteamGameAdapter(games, this::onPlayGame, hasContainer));
-                recentRecycler.setAdapter(new SteamRecentAdapter(recentlyPlayed, this::onPlayGame));
+                grid.setAdapter(new SteamGameAdapter(games, this::onPlayGame, this::onDownloadGame, hasContainer, installedAppIds));
+                recentRecycler.setAdapter(new SteamRecentAdapter(recentlyPlayed, this::onPlayGame, this::onDownloadGame, installedAppIds));
                 labelRecentlyPlayed.setVisibility(recentlyPlayed.isEmpty() ? View.GONE : View.VISIBLE);
                 recentRecycler.setVisibility(recentlyPlayed.isEmpty() ? View.GONE : View.VISIBLE);
                 gameCountText.setText(String.valueOf(games.size()));
@@ -180,6 +192,15 @@ public class SteamLibraryFragment extends Fragment {
         launchSteamGame(container, game);
     }
 
+    /** Open Steam store page for a game so user can install it. Do not launch game. */
+    private void onDownloadGame(SteamWebApi.Game game) {
+        String url = "https://store.steampowered.com/app/" + game.appId + "/";
+        Intent i = new Intent(requireContext(), SteamStoreActivity.class);
+        i.putExtra(SteamStoreActivity.EXTRA_URL, url);
+        i.putExtra(SteamStoreActivity.EXTRA_TITLE, game.name);
+        startActivity(i);
+    }
+
     /** Show dialog when container creation fails, with Retry button. */
     private void showPreparingFailedDialog(SteamWebApi.Game game) {
         ContentDialog dialog = new ContentDialog(requireContext());
@@ -205,15 +226,54 @@ public class SteamLibraryFragment extends Fragment {
         startActivity(intent);
     }
 
+    /**
+     * Launch Steam client in the container (Library/Big Picture) so user can install games.
+     * Call when SteamRuntimeState is STEAM_READY.
+     */
+    public static void launchSteamClient(Fragment fragment, Container container) {
+        if (container == null || fragment.getActivity() == null) return;
+        File desktopDir = container.getDesktopDir();
+        if (!desktopDir.isDirectory()) desktopDir.mkdirs();
+        File desktopFile = new File(desktopDir, "Steam.desktop");
+        String steamWinPath = "C:\\Program Files (x86)\\Steam\\steam.exe";
+        String content = "[Desktop Entry]\nType=Application\nName=Steam\nExec=wine \"" + steamWinPath + "\"\n";
+        FileUtils.writeString(desktopFile, content);
+        Intent intent = new Intent(fragment.requireActivity(), XServerDisplayActivity.class);
+        intent.putExtra("container_id", container.id);
+        intent.putExtra("shortcut_path", desktopFile.getPath());
+        fragment.requireActivity().startActivity(intent);
+    }
+
+    /** Launch an installed game by appId (for Home screen). */
+    public static void launchSteamGameByAppId(Fragment fragment, Container container, String appId, String name) {
+        if (container == null || fragment.getActivity() == null || appId == null) return;
+        File desktopDir = container.getDesktopDir();
+        if (!desktopDir.isDirectory()) desktopDir.mkdirs();
+        String safeName = "Steam " + appId + ".desktop";
+        File desktopFile = new File(desktopDir, safeName);
+        String steamWinPath = "C:\\Program Files (x86)\\Steam\\steam.exe";
+        String displayName = name != null ? name : ("App " + appId);
+        String content = "[Desktop Entry]\nType=Application\nName=" + displayName + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=-applaunch " + appId + "\n";
+        FileUtils.writeString(desktopFile, content);
+        Intent intent = new Intent(fragment.requireActivity(), XServerDisplayActivity.class);
+        intent.putExtra("container_id", container.id);
+        intent.putExtra("shortcut_path", desktopFile.getPath());
+        fragment.requireActivity().startActivity(intent);
+    }
+
     private static class SteamGameAdapter extends RecyclerView.Adapter<SteamGameAdapter.Holder> {
         private final List<SteamWebApi.Game> list;
         private final OnPlayListener onPlay;
+        private final OnDownloadListener onDownload;
         private final boolean hasContainer;
+        private final Set<String> installedAppIds;
 
-        SteamGameAdapter(List<SteamWebApi.Game> list, OnPlayListener onPlay, boolean hasContainer) {
+        SteamGameAdapter(List<SteamWebApi.Game> list, OnPlayListener onPlay, OnDownloadListener onDownload, boolean hasContainer, Set<String> installedAppIds) {
             this.list = list;
             this.onPlay = onPlay;
+            this.onDownload = onDownload;
             this.hasContainer = hasContainer;
+            this.installedAppIds = installedAppIds != null ? installedAppIds : new HashSet<>();
         }
 
         @NonNull
@@ -231,9 +291,22 @@ public class SteamLibraryFragment extends Fragment {
             h.playtime.setVisibility(hrs > 0 ? View.VISIBLE : View.GONE);
             h.image.setImageDrawable(null);
             loadImage(h.image, g.headerUrl);
-            h.play.setText(h.itemView.getContext().getString(hasContainer ? R.string.steam_launch_game : R.string.tile_action_create_container));
-            h.play.setOnClickListener(v -> onPlay.onPlay(g));
-            h.itemView.setOnClickListener(v -> onPlay.onPlay(g));
+            boolean installed = hasContainer && installedAppIds.contains(String.valueOf(g.appId));
+            if (installed) {
+                h.play.setText(h.itemView.getContext().getString(R.string.steam_launch_game));
+                h.play.setOnClickListener(v -> onPlay.onPlay(g));
+                h.itemView.setOnClickListener(v -> onPlay.onPlay(g));
+            } else {
+                h.play.setText(h.itemView.getContext().getString(hasContainer ? R.string.steam_download_game : R.string.tile_action_create_container));
+                h.play.setOnClickListener(v -> {
+                    if (hasContainer) onDownload.onDownload(g);
+                    else onPlay.onPlay(g);
+                });
+                h.itemView.setOnClickListener(v -> {
+                    if (hasContainer) onDownload.onDownload(g);
+                    else onPlay.onPlay(g);
+                });
+            }
         }
 
         private void loadImage(ImageView iv, String url) {
@@ -279,10 +352,14 @@ public class SteamLibraryFragment extends Fragment {
     private static class SteamRecentAdapter extends RecyclerView.Adapter<SteamRecentAdapter.Holder> {
         private final List<SteamWebApi.Game> list;
         private final OnPlayListener onPlay;
+        private final OnDownloadListener onDownload;
+        private final Set<String> installedAppIds;
 
-        SteamRecentAdapter(List<SteamWebApi.Game> list, OnPlayListener onPlay) {
+        SteamRecentAdapter(List<SteamWebApi.Game> list, OnPlayListener onPlay, OnDownloadListener onDownload, Set<String> installedAppIds) {
             this.list = list;
             this.onPlay = onPlay;
+            this.onDownload = onDownload;
+            this.installedAppIds = installedAppIds != null ? installedAppIds : new HashSet<>();
         }
 
         @NonNull
@@ -298,7 +375,11 @@ public class SteamLibraryFragment extends Fragment {
             h.playtime.setText(g.playtimeMinutes >= 60 ? h.itemView.getContext().getString(R.string.steam_playtime, (int)(g.playtimeMinutes / 60)) : g.playtimeMinutes + " min");
             h.image.setImageDrawable(null);
             SteamGameAdapter.loadImageStatic(h.image, g.headerUrl);
-            h.itemView.setOnClickListener(v -> onPlay.onPlay(g));
+            boolean installed = installedAppIds.contains(String.valueOf(g.appId));
+            h.itemView.setOnClickListener(v -> {
+                if (installed) onPlay.onPlay(g);
+                else onDownload.onDownload(g);
+            });
         }
 
         @Override

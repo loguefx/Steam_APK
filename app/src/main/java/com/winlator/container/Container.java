@@ -248,6 +248,11 @@ public class Container {
         return new File(rootDir, ".wine/drive_c/ProgramData/Microsoft/Windows/Start Menu/");
     }
 
+    /** Steam install root inside container (Windows path: C:\Program Files (x86)\Steam). */
+    public File getSteamRootDir() {
+        return new File(rootDir, ".wine/drive_c/Program Files (x86)/Steam");
+    }
+
     public File getIconsDir(int size) {
         return new File(rootDir, ".local/share/icons/hicolor/"+size+"x"+size+"/apps/");
     }

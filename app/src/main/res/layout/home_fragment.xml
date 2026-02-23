@@ -104,6 +104,31 @@
         android:paddingBottom="8dp"
         android:scrollbars="none" />
 
+    <!-- Empty state when no installed games (Steam tile still shown in grid) -->
+    <LinearLayout
+        android:id="@+id/HomeEmptyState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_installed_games"
+            android:textColor="@color/gamehub_text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/open_steam_to_install"
+            android:textColor="@color/gamehub_text_secondary"
+            android:textSize="16sp" />
+    </LinearLayout>
+
     <!-- Bottom account strip (Game Hub): avatar, username, stats, Y Search, Menu -->
     <LinearLayout
         android:layout_width="match_parent"

@@ -3,6 +3,8 @@ package com.winlator;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,15 +21,23 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.winlator.contentdialog.ContentDialog;
+import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
-import com.winlator.container.Shortcut;
+import com.winlator.steam.InstalledSteamGame;
+import com.winlator.steam.InstalledSteamGamesRepository;
+import com.winlator.steam.SteamRuntimeState;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
- * Game Hub–style home screen: grid of Steam tile + installed game shortcuts.
- * Steam tile opens My Games (Steam library); game cards launch via XServerDisplayActivity.
+ * Game Hub–style home: Steam tile + installed games only (from Steam library scan).
+ * Steam tile = install gateway (provision container/Steam, then launch Steam client).
  */
 public class HomeFragment extends Fragment {
     private static final int GRID_COLUMNS = 3;
@@ -36,8 +46,13 @@ public class HomeFragment extends Fragment {
     private static final int VIEW_TYPE_GAME = 1;
 
     private RecyclerView grid;
+    private View homeEmptyState;
     private ContainerManager containerManager;
-    private ArrayList<Shortcut> shortcuts = new ArrayList<>();
+    private Container container;
+    private InstalledSteamGamesRepository repository;
+    private SteamRuntimeState steamState = SteamRuntimeState.NO_CONTAINER;
+    private final List<InstalledSteamGame> installedGames = new ArrayList<>();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,29 +71,29 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         containerManager = new ContainerManager(requireContext());
         grid = view.findViewById(R.id.HomeGrid);
+        homeEmptyState = view.findViewById(R.id.HomeEmptyState);
         int spacingPx = (int) (GRID_SPACING_DP * getResources().getDisplayMetrics().density);
         GridLayoutManager glm = new GridLayoutManager(requireContext(), GRID_COLUMNS);
         glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                return position == 0 ? 2 : 1; // Hero: Steam tile spans 2 columns
+                return position == 0 ? 2 : 1;
             }
         });
         grid.setLayoutManager(glm);
         grid.addItemDecoration(new GridSpacingItemDecoration(GRID_COLUMNS, spacingPx));
-        grid.setAdapter(new HomeAdapter(shortcuts, this::onSteamTileClick, this::onGameClick));
+        grid.setAdapter(new HomeAdapter(installedGames, steamState, this::onSteamTileClick, this::onGameClick));
 
         view.findViewById(R.id.TabDiscover).setOnClickListener(v -> openSteamStore(true));
         view.findViewById(R.id.TabFindGames).setOnClickListener(v -> openSteamStore(false));
         view.findViewById(R.id.BtnSearch).setOnClickListener(v -> openSteamStore(false));
-
-        view.findViewById(R.id.TabMy).setSelected(true); // Pill highlight for My
+        view.findViewById(R.id.TabMy).setSelected(true);
         updateAccountStrip(view);
 
         if (getActivity() instanceof AppCompatActivity) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(R.string.home);
         }
-        loadShortcuts();
+        loadInstalledGames();
         showFirstTimeSetupIfNeeded();
     }
 
@@ -112,37 +127,106 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadShortcuts();
+        loadInstalledGames();
     }
 
-    private void loadShortcuts() {
-        shortcuts.clear();
-        shortcuts.addAll(containerManager.loadShortcuts());
-        if (grid.getAdapter() != null) {
-            grid.getAdapter().notifyDataSetChanged();
-        }
+    private void loadInstalledGames() {
+        executor.execute(() -> {
+            Container c = containerManager.getDefaultContainer();
+            InstalledSteamGamesRepository repo = c != null ? new InstalledSteamGamesRepository(c) : null;
+            InstalledSteamGamesRepository.Result result = repo != null ? repo.getInstalledGames() : new InstalledSteamGamesRepository.Result(SteamRuntimeState.NO_CONTAINER, new ArrayList<>());
+            if (c == null) {
+                result = new InstalledSteamGamesRepository.Result(SteamRuntimeState.NO_CONTAINER, new ArrayList<>());
+            }
+            final SteamRuntimeState state = result.state;
+            final List<InstalledSteamGame> games = result.games;
+            final Container cont = c;
+            requireActivity().runOnUiThread(() -> {
+                container = cont;
+                repository = repo;
+                steamState = state;
+                installedGames.clear();
+                installedGames.addAll(games);
+                if (grid.getAdapter() != null) {
+                    ((HomeAdapter) grid.getAdapter()).setState(state);
+                    grid.getAdapter().notifyDataSetChanged();
+                }
+                homeEmptyState.setVisibility(games.isEmpty() ? View.VISIBLE : View.GONE);
+            });
+        });
     }
 
     private void onSteamTileClick() {
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).showFragment(new SteamLibraryFragment());
+        if (steamState == SteamRuntimeState.NO_CONTAINER) {
+            containerManager.getOrCreateDefaultContainerAsync(c -> {
+                if (c == null) {
+                    showPreparingFailedDialog();
+                    return;
+                }
+                executor.execute(() -> {
+                    InstalledSteamGamesRepository.Result r = new InstalledSteamGamesRepository(c).getInstalledGames();
+                    requireActivity().runOnUiThread(() -> {
+                        container = c;
+                        repository = new InstalledSteamGamesRepository(c);
+                        steamState = r.state;
+                        installedGames.clear();
+                        installedGames.addAll(r.games);
+                        if (grid.getAdapter() != null) {
+                            ((HomeAdapter) grid.getAdapter()).setState(steamState);
+                            grid.getAdapter().notifyDataSetChanged();
+                        }
+                        homeEmptyState.setVisibility(installedGames.isEmpty() ? View.VISIBLE : View.GONE);
+                        if (steamState == SteamRuntimeState.STEAM_READY) {
+                            SteamLibraryFragment.launchSteamClient(HomeFragment.this, c);
+                        } else if (steamState == SteamRuntimeState.STEAM_NOT_INSTALLED) {
+                            showInstallSteamDialog(c);
+                        }
+                    });
+                });
+            });
+            return;
+        }
+        if (steamState == SteamRuntimeState.STEAM_NOT_INSTALLED) {
+            showInstallSteamDialog(container);
+            return;
+        }
+        if (steamState == SteamRuntimeState.STEAM_READY && container != null) {
+            SteamLibraryFragment.launchSteamClient(this, container);
         }
     }
 
-    private void onGameClick(Shortcut shortcut) {
-        Activity activity = getActivity();
-        if (activity == null) return;
-        if (!XrActivity.isSupported()) {
-            Intent intent = new Intent(activity, XServerDisplayActivity.class);
-            intent.putExtra("container_id", shortcut.container.id);
-            intent.putExtra("shortcut_path", shortcut.file.getPath());
-            activity.startActivity(intent);
+    private void showInstallSteamDialog(Container c) {
+        ContentDialog dialog = new ContentDialog(requireContext());
+        dialog.setTitle(R.string.tile_action_install_steam);
+        dialog.setMessage(R.string.install_steam_in_container);
+        dialog.findViewById(R.id.BTCancel).setVisibility(View.GONE);
+        dialog.show();
+    }
+
+    private void showPreparingFailedDialog() {
+        ContentDialog dialog = new ContentDialog(requireContext());
+        dialog.setMessage(R.string.preparing_environment_failed);
+        dialog.getContentView().findViewById(R.id.BTConfirm).setContentDescription(getString(R.string.retry));
+        ((android.widget.Button) dialog.getContentView().findViewById(R.id.BTConfirm)).setText(R.string.retry);
+        dialog.findViewById(R.id.BTCancel).setVisibility(View.GONE);
+        dialog.setOnConfirmCallback(this::onSteamTileClick);
+        dialog.show();
+    }
+
+    private void onGameClick(InstalledSteamGame game) {
+        if (container == null) return;
+        if (XrActivity.isSupported()) {
+            java.io.File desktopFile = new java.io.File(container.getDesktopDir(), "Steam " + game.appId + ".desktop");
+            if (!container.getDesktopDir().isDirectory()) container.getDesktopDir().mkdirs();
+            String steamWinPath = "C:\\Program Files (x86)\\Steam\\steam.exe";
+            String content = "[Desktop Entry]\nType=Application\nName=" + game.name + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=-applaunch " + game.appId + "\n";
+            com.winlator.core.FileUtils.writeString(desktopFile, content);
+            XrActivity.openIntent(requireActivity(), container.id, desktopFile.getPath());
         } else {
-            XrActivity.openIntent(activity, shortcut.container.id, shortcut.file.getPath());
+            SteamLibraryFragment.launchSteamGameByAppId(this, container, game.appId, game.name);
         }
     }
 
-    /** Discover = store front; Find games / Y Search = store search (Game Hub behavior). */
     private void openSteamStore(boolean discover) {
         Intent i = new Intent(requireContext(), SteamStoreActivity.class);
         i.putExtra(SteamStoreActivity.EXTRA_URL,
@@ -153,18 +237,24 @@ public class HomeFragment extends Fragment {
     }
 
     private static class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        private final List<Shortcut> shortcuts;
+        private final List<InstalledSteamGame> installedGames;
+        private SteamRuntimeState steamState;
         private final Runnable onSteamClick;
         private final OnGameClickListener onGameClick;
 
         interface OnGameClickListener {
-            void onGameClick(Shortcut shortcut);
+            void onGameClick(InstalledSteamGame game);
         }
 
-        HomeAdapter(List<Shortcut> shortcuts, Runnable onSteamClick, OnGameClickListener onGameClick) {
-            this.shortcuts = shortcuts;
+        HomeAdapter(List<InstalledSteamGame> installedGames, SteamRuntimeState steamState, Runnable onSteamClick, OnGameClickListener onGameClick) {
+            this.installedGames = installedGames;
+            this.steamState = steamState;
             this.onSteamClick = onSteamClick;
             this.onGameClick = onGameClick;
+        }
+
+        void setState(SteamRuntimeState state) {
+            this.steamState = state;
         }
 
         @Override
@@ -174,7 +264,7 @@ public class HomeFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return 1 + shortcuts.size();
+            return 1 + installedGames.size();
         }
 
         @NonNull
@@ -193,10 +283,19 @@ public class HomeFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            if (holder instanceof GameHolder) {
-                Shortcut s = shortcuts.get(position - 1);
-                ((GameHolder) holder).bind(s);
+            if (position == 0) {
+                TextView hint = holder.itemView.findViewById(R.id.SteamTileHint);
+                if (hint != null) {
+                    int resId;
+                    if (steamState == SteamRuntimeState.STEAM_READY) resId = R.string.tile_action_open_steam;
+                    else if (steamState == SteamRuntimeState.STEAM_NOT_INSTALLED) resId = R.string.tile_action_install_steam;
+                    else resId = R.string.tile_action_create_container;
+                    hint.setText(resId);
+                }
+                return;
             }
+            InstalledSteamGame game = installedGames.get(position - 1);
+            ((GameHolder) holder).bind(game);
         }
 
         private class GameHolder extends RecyclerView.ViewHolder {
@@ -211,25 +310,38 @@ public class HomeFragment extends Fragment {
                 action = itemView.findViewById(R.id.HomeGameAction);
                 itemView.setOnClickListener(v -> {
                     int pos = getAdapterPosition();
-                    if (pos != RecyclerView.NO_POSITION && pos > 0 && pos <= shortcuts.size()) {
-                        onGameClick.onGameClick(shortcuts.get(pos - 1));
+                    if (pos != RecyclerView.NO_POSITION && pos > 0 && pos <= installedGames.size()) {
+                        onGameClick.onGameClick(installedGames.get(pos - 1));
                     }
                 });
                 setupFocusAnimation(itemView);
             }
 
-            void bind(Shortcut s) {
-                name.setText(s.name);
-                action.setText(itemView.getContext().getString(R.string.tile_action_play)); // Ready
-                if (s.icon != null) {
-                    image.setImageBitmap(s.icon);
-                } else {
-                    image.setImageDrawable(null);
-                }
+            void bind(InstalledSteamGame game) {
+                name.setText(game.name);
+                action.setText(itemView.getContext().getString(R.string.tile_action_play));
+                String url = "https://cdn.cloudflare.steamstatic.com/steam/apps/" + game.appId + "/header.jpg";
+                loadImage(image, url);
             }
         }
 
-        /** 10-foot UI: scale 1.0 → 1.06 and elevation when focused. */
+        private static void loadImage(ImageView iv, String url) {
+            iv.setTag(url);
+            new Thread(() -> {
+                try {
+                    HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+                    c.setConnectTimeout(5000);
+                    c.setReadTimeout(5000);
+                    InputStream in = c.getInputStream();
+                    Bitmap b = BitmapFactory.decodeStream(in);
+                    if (in != null) in.close();
+                    if (b != null && url.equals(iv.getTag())) {
+                        iv.post(() -> { if (url.equals(iv.getTag())) iv.setImageBitmap(b); });
+                    }
+                } catch (Throwable t) { /* ignore */ }
+            }).start();
+        }
+
         private static void setupFocusAnimation(View v) {
             v.setOnFocusChangeListener((view, hasFocus) -> {
                 view.animate().scaleX(hasFocus ? 1.06f : 1f).scaleY(hasFocus ? 1.06f : 1f)
@@ -241,7 +353,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    /** Even spacing between grid items (Game Hub style). */
     private static class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
         private final int spanCount;
         private final int spacingPx;

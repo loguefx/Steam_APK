@@ -19,6 +19,7 @@
     <string name="steam_play">Play</string>
     <string name="tile_action_play">A  Play</string>
     <string name="tile_action_open">A  Open</string>
+    <string name="tile_action_open_steam">A  Open Steam</string>
     <string name="tile_action_create_container">A  Create container</string>
     <string name="tile_action_install_steam">A  Install Steam</string>
     <string name="tile_action_install">A  Install</string>
@@ -36,6 +37,7 @@
     <string name="steam_all_games">All games</string>
     <string name="steam_game_time">Game time: %1$d min</string>
     <string name="steam_launch_game">A Launch game</string>
+    <string name="steam_download_game">A  Download</string>
     <string name="steam_view_details">View details</string>
     <string name="controller_y_search">Y Search</string>
     <string name="controller_b_back">B Back</string>
@@ -44,6 +46,9 @@
     <string name="controller_menu">Menu</string>
     <string name="home">Home</string>
     <string name="home_my">My</string>
+    <string name="no_installed_games">No installed games</string>
+    <string name="open_steam_to_install">Open Steam to install games</string>
+    <string name="install_steam_in_container">Install Steam in the container from Desktop, then open Steam from here.</string>
     <string name="account_not_signed_in">Not signed in</string>
     <string name="steam_tile_description">Steam: View and manage all games under your current Steam account</string>
     <string name="device_title">Device</string>
