@@ -246,7 +246,7 @@ public class SteamLibraryFragment extends Fragment {
         if (!desktopDir.isDirectory()) desktopDir.mkdirs();
         String safeName = "Steam " + game.appId + ".desktop";
         File desktopFile = new File(desktopDir, safeName);
-        String steamWinPath = "C:\\Program Files (x86)\\Steam\\steam.exe";
+        String steamWinPath = container.getSteamRootWindowsPath() + "\\steam.exe";
         String content = "[Desktop Entry]\nType=Application\nName=" + game.name + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=-applaunch " + game.appId + "\n";
         FileUtils.writeString(desktopFile, content);
         Intent intent = new Intent(requireActivity(), XServerDisplayActivity.class);
@@ -264,7 +264,7 @@ public class SteamLibraryFragment extends Fragment {
         File desktopDir = container.getDesktopDir();
         if (!desktopDir.isDirectory()) desktopDir.mkdirs();
         File desktopFile = new File(desktopDir, "Steam.desktop");
-        String steamWinPath = "C:\\Program Files (x86)\\Steam\\steam.exe";
+        String steamWinPath = container.getSteamRootWindowsPath() + "\\steam.exe";
         String content = "[Desktop Entry]\nType=Application\nName=Steam\nExec=wine \"" + steamWinPath + "\"\n";
         FileUtils.writeString(desktopFile, content);
         Intent intent = new Intent(fragment.requireActivity(), XServerDisplayActivity.class);
@@ -280,7 +280,7 @@ public class SteamLibraryFragment extends Fragment {
         if (!desktopDir.isDirectory()) desktopDir.mkdirs();
         String safeName = "Steam " + appId + ".desktop";
         File desktopFile = new File(desktopDir, safeName);
-        String steamWinPath = "C:\\Program Files (x86)\\Steam\\steam.exe";
+        String steamWinPath = container.getSteamRootWindowsPath() + "\\steam.exe";
         String displayName = name != null ? name : ("App " + appId);
         String content = "[Desktop Entry]\nType=Application\nName=" + displayName + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=-applaunch " + appId + "\n";
         FileUtils.writeString(desktopFile, content);

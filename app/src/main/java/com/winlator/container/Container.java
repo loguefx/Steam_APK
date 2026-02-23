@@ -248,9 +248,40 @@ public class Container {
         return new File(rootDir, ".wine/drive_c/ProgramData/Microsoft/Windows/Start Menu/");
     }
 
-    /** Steam install root inside container (Windows path: C:\Program Files (x86)\Steam). */
+    /** Steam install root inside container. Resolves to the path that actually contains steam.exe (Program Files (x86)/Steam or Program Files/Steam). */
     public File getSteamRootDir() {
+        File rootDir = getRootDir();
+        if (rootDir == null || !rootDir.isDirectory()) return new File(this.rootDir, ".wine/drive_c/Program Files (x86)/Steam");
+        String[] candidates = {
+            ".wine/drive_c/Program Files (x86)/Steam",
+            ".wine/drive_c/Program Files/Steam"
+        };
+        for (String path : candidates) {
+            File steamRoot = new File(rootDir, path);
+            if (steamRoot.isDirectory() && new File(steamRoot, "steam.exe").isFile())
+                return steamRoot;
+        }
         return new File(rootDir, ".wine/drive_c/Program Files (x86)/Steam");
+    }
+
+    /** Windows path for Steam root (for .desktop Exec=wine "C:\...\steam.exe"). */
+    public String getSteamRootWindowsPath() {
+        File rootDir = getRootDir();
+        if (rootDir == null || !rootDir.isDirectory()) return "C:\\Program Files (x86)\\Steam";
+        String[] candidates = {
+            ".wine/drive_c/Program Files (x86)/Steam",
+            ".wine/drive_c/Program Files/Steam"
+        };
+        String[] winPaths = {
+            "C:\\Program Files (x86)\\Steam",
+            "C:\\Program Files\\Steam"
+        };
+        for (int i = 0; i < candidates.length; i++) {
+            File steamRoot = new File(rootDir, candidates[i]);
+            if (steamRoot.isDirectory() && new File(steamRoot, "steam.exe").isFile())
+                return winPaths[i];
+        }
+        return "C:\\Program Files (x86)\\Steam";
     }
 
     public File getIconsDir(int size) {

@@ -224,7 +224,7 @@ public class HomeFragment extends Fragment {
         if (XrActivity.isSupported()) {
             java.io.File desktopFile = new java.io.File(container.getDesktopDir(), "Steam " + game.appId + ".desktop");
             if (!container.getDesktopDir().isDirectory()) container.getDesktopDir().mkdirs();
-            String steamWinPath = "C:\\Program Files (x86)\\Steam\\steam.exe";
+            String steamWinPath = container.getSteamRootWindowsPath() + "\\steam.exe";
             String content = "[Desktop Entry]\nType=Application\nName=" + game.name + "\nExec=wine \"" + steamWinPath + "\"\n\n[Extra Data]\nexecArgs=-applaunch " + game.appId + "\n";
             com.winlator.core.FileUtils.writeString(desktopFile, content);
             XrActivity.openIntent(requireActivity(), container.id, desktopFile.getPath());
