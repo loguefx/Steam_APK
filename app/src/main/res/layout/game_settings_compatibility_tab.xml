@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/graphics_driver"
+            android:textColor="@color/gamehub_text_primary" />
+        <Spinner
+            android:id="@+id/GameSettingsCompatGraphicsDriver"
+            style="@style/ComboBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:entries="@array/graphics_driver_entries" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/dxwrapper"
+            android:textColor="@color/gamehub_text_primary" />
+        <Spinner
+            android:id="@+id/GameSettingsCompatDxWrapper"
+            style="@style/ComboBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:entries="@array/dxwrapper_entries" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/audio_driver"
+            android:textColor="@color/gamehub_text_primary" />
+        <Spinner
+            android:id="@+id/GameSettingsCompatAudioDriver"
+            style="@style/ComboBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:entries="@array/audio_driver_entries" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/box86_preset"
+            android:textColor="@color/gamehub_text_primary" />
+        <Spinner
+            android:id="@+id/GameSettingsCompatBox86Preset"
+            style="@style/ComboBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/box64_preset"
+            android:textColor="@color/gamehub_text_primary" />
+        <Spinner
+            android:id="@+id/GameSettingsCompatBox64Preset"
+            style="@style/ComboBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/surface_format"
+            android:textColor="@color/gamehub_text_primary" />
+        <EditText
+            android:id="@+id/GameSettingsCompatSurfaceFormat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="BGRA8"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/cpu_core_limit"
+            android:textColor="@color/gamehub_text_primary" />
+        <EditText
+            android:id="@+id/GameSettingsCompatCpuCoreLimit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="0"
+            android:inputType="number"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/vram_limit_mb"
+            android:textColor="@color/gamehub_text_primary" />
+        <EditText
+            android:id="@+id/GameSettingsCompatVramLimit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="0"
+            android:inputType="number"
+            android:maxLines="1" />
+    </LinearLayout>
+</ScrollView>

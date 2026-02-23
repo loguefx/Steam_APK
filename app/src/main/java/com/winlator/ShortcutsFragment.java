@@ -26,7 +26,6 @@ import com.winlator.container.ContainerManager;
 import com.winlator.container.Shortcut;
 import com.winlator.gamehubpp.LaunchCoordinator;
 import com.winlator.contentdialog.ContentDialog;
-import com.winlator.contentdialog.ShortcutSettingsDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +120,11 @@ public class ShortcutsFragment extends Fragment {
             listItemMenu.setOnMenuItemClickListener((menuItem) -> {
                 int itemId = menuItem.getItemId();
                 if (itemId == R.id.shortcut_settings) {
-                    (new ShortcutSettingsDialog(ShortcutsFragment.this, shortcut)).show();
+                    getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.FLFragmentContainer, GameSettingsFragment.newInstance(shortcut.container.id, shortcut.file.getPath()))
+                        .addToBackStack(null)
+                        .commit();
                 }
                 else if (itemId == R.id.shortcut_pin_lkg) {
                     String gameId = "c" + shortcut.container.id + "_" + shortcut.file.getName();

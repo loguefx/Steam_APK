@@ -12,4 +12,5 @@
     <color name="gamehub_text_secondary">#b0b0b0</color>
     <color name="gamehub_accent">#1b9dd3</color>
     <color name="gamehub_toolbar">#1a1a1a</color>
+    <color name="gamehub_steam_tile">#1b2838</color>
 </resources>

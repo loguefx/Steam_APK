@@ -31,8 +31,6 @@ import com.winlator.core.Callback;
 import com.winlator.core.PreloaderDialog;
 import com.winlator.xenvironment.ImageFsInstaller;
 
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final @IntRange(from = 1, to = 19) byte CONTAINER_PATTERN_COMPRESSION_LEVEL = 9;
     public static final byte PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 1;
@@ -68,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         else {
             int selectedMenuItemId = intent.getIntExtra("selected_menu_item_id", 0);
-            int menuItemId = selectedMenuItemId > 0 ? selectedMenuItemId : R.id.main_menu_steam_library;
+            int menuItemId = selectedMenuItemId > 0 ? selectedMenuItemId : R.id.main_menu_home;
 
             actionBar.setHomeAsUpIndicator(R.drawable.icon_action_bar_menu);
             onNavigationItemSelected(navigationView.getMenu().findItem(menuItemId));
@@ -106,14 +104,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
         FragmentManager fragmentManager = getSupportFragmentManager();
-        List<Fragment> fragments = fragmentManager.getFragments();
-        for (Fragment fragment : fragments) {
-            if (fragment instanceof ContainersFragment && fragment.isVisible()) {
-                finish();
-                return;
-            }
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+            fragmentManager.popBackStack();
+            return;
         }
-        show(new ContainersFragment());
+        show(new HomeFragment());
     }
 
     public void setOpenFileCallback(Callback<Uri> openFileCallback) {
@@ -152,14 +147,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         switch (item.getItemId()) {
+            case R.id.main_menu_home:
+                show(new HomeFragment());
+                break;
             case R.id.main_menu_steam_library:
                 show(new SteamLibraryFragment());
                 break;
+            case R.id.main_menu_discover:
+                show(new DiscoverFragment());
+                break;
             case R.id.main_menu_shortcuts:
                 show(new ShortcutsFragment());
-                break;
-            case R.id.main_menu_containers:
-                show(new ContainersFragment());
                 break;
             case R.id.main_menu_input_controls:
                 show(new InputControlsFragment(selectedProfileId));
@@ -195,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void show(Fragment fragment) {
+    public void show(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
             .replace(R.id.FLFragmentContainer, fragment)

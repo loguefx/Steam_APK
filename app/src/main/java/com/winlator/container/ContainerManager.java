@@ -186,6 +186,31 @@ public class ContainerManager {
         return null;
     }
 
+    /** Returns the first container, or null if none exist. */
+    public Container getDefaultContainer() {
+        return containers.isEmpty() ? null : containers.get(0);
+    }
+
+    /**
+     * Game Hub–style: ensure a container exists so the user can "just add a game."
+     * If no container exists, creates one named "Default" asynchronously and passes it to the callback.
+     */
+    public void getOrCreateDefaultContainerAsync(final Callback<Container> callback) {
+        if (callback == null) return;
+        Container existing = getDefaultContainer();
+        if (existing != null) {
+            callback.call(existing);
+            return;
+        }
+        try {
+            JSONObject data = new JSONObject();
+            data.put("name", context.getString(R.string.default_container_name));
+            createContainerAsync(data, callback);
+        } catch (org.json.JSONException e) {
+            callback.call(null);
+        }
+    }
+
     private void extractCommonDlls(String srcName, String dstName, JSONObject commonDlls, File containerDir, OnExtractFileListener onExtractFileListener) throws JSONException {
         File srcDir = new File(ImageFs.find(context).getRootDir(), "/opt/wine/lib/wine/"+srcName);
         JSONArray dlnames = commonDlls.getJSONArray(dstName);

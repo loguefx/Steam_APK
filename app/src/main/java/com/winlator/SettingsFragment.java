@@ -172,10 +172,10 @@ public class SettingsFragment extends Fragment {
 
             if (editor.commit()) {
                 NavigationView navigationView = getActivity().findViewById(R.id.NavigationView);
-                navigationView.setCheckedItem(R.id.main_menu_containers);
+                navigationView.setCheckedItem(R.id.main_menu_settings);
                 FragmentManager fragmentManager = getParentFragmentManager();
                 fragmentManager.beginTransaction()
-                    .replace(R.id.FLFragmentContainer, new ContainersFragment())
+                    .replace(R.id.FLFragmentContainer, new SettingsFragment())
                     .commit();
             }
         });

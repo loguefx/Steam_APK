@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
 import com.winlator.core.FileUtils;
+import com.winlator.core.PreloaderDialog;
 import com.winlator.core.SteamWebApi;
 
 import java.io.File;
@@ -58,6 +59,7 @@ public class SteamLibraryFragment extends Fragment {
     private List<SteamWebApi.Game> games = new ArrayList<>();
     private List<SteamWebApi.Game> recentlyPlayed = new ArrayList<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private PreloaderDialog preloaderDialog;
 
     @Nullable
     @Override
@@ -75,13 +77,14 @@ public class SteamLibraryFragment extends Fragment {
 
         root.findViewById(R.id.TabStore).setOnClickListener(v -> openSteamStore());
         root.findViewById(R.id.BtnSearch).setOnClickListener(v -> openSteamStore());
-        root.findViewById(R.id.TabDiscover).setOnClickListener(v -> openSteamStore());
+        root.findViewById(R.id.TabDiscover).setOnClickListener(v -> openDiscover());
         return root;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        preloaderDialog = new PreloaderDialog(requireActivity());
         ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(R.string.steam_library);
         loadLibrary();
     }
@@ -157,14 +160,31 @@ public class SteamLibraryFragment extends Fragment {
         }
     }
 
+    private void openDiscover() {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).show(new DiscoverFragment());
+        }
+    }
+
     private void onPlayGame(SteamWebApi.Game game) {
         ContainerManager cm = new ContainerManager(requireContext());
-        List<Container> containers = cm.getContainers();
-        if (containers == null || containers.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.steam_need_container, Toast.LENGTH_LONG).show();
+        Container container = cm.getDefaultContainer();
+        if (container != null) {
+            launchSteamGame(container, game);
             return;
         }
-        Container container = containers.get(0);
+        preloaderDialog.show(R.string.import_game_creating_container);
+        cm.getOrCreateDefaultContainerAsync(c -> {
+            preloaderDialog.close();
+            if (c == null) {
+                Toast.makeText(requireContext(), R.string.steam_need_container, Toast.LENGTH_LONG).show();
+                return;
+            }
+            launchSteamGame(c, game);
+        });
+    }
+
+    private void launchSteamGame(Container container, SteamWebApi.Game game) {
         File desktopDir = container.getDesktopDir();
         if (!desktopDir.isDirectory()) desktopDir.mkdirs();
         String safeName = "Steam " + game.appId + ".desktop";

@@ -29,6 +29,7 @@ import com.winlator.contentdialog.ContentDialog;
 import com.winlator.contentdialog.DXVKConfigDialog;
 import com.winlator.contentdialog.DebugDialog;
 import com.winlator.core.AppUtils;
+import com.winlator.gamehubpp.ConfigResolver;
 import com.winlator.core.DefaultVersion;
 import com.winlator.core.EnvVars;
 import com.winlator.core.FileUtils;
@@ -432,6 +433,9 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 Resolver.ResolveResult resolved = LaunchCoordinator.get(this).getCurrentResolveResult();
                 if (resolved != null && resolved.env != null) {
                     for (java.util.Map.Entry<String, String> e : resolved.env.entrySet()) envVars.put(e.getKey(), e.getValue());
+                }
+                for (java.util.Map.Entry<String, String> e : ConfigResolver.getEffectiveEnv(container, shortcut, LaunchCoordinator.get(this).getCurrentResolveResult()).entrySet()) {
+                    envVars.put(e.getKey(), e.getValue());
                 }
             }
             if (!envVars.has("WINEESYNC")) envVars.put("WINEESYNC", "1");

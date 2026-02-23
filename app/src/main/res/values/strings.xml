@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Winlator</string>
+    <string name="home">Home</string>
+    <string name="steam_tile_title">Steam</string>
+    <string name="steam_tile_subtitle">View and manage all games under your current Steam account.</string>
+    <string name="home_installed_games">Installed games</string>
     <string name="steam_sign_in_title">Sign in with Steam</string>
     <string name="steam_sign_in_description">Sign in to access your library and launch games.</string>
     <string name="steam_sign_in_failed">Sign-in failed. Please try again.</string>
@@ -77,6 +81,13 @@
     <string name="add">Add</string>
     <string name="shortcuts">Shortcuts</string>
     <string name="containers">Containers</string>
+    <string name="default_container_name">Default</string>
+    <string name="import_game">Import game</string>
+    <string name="add_game">Add game</string>
+    <string name="import_game_select_file">Select an .exe file (place games in Downloads for best compatibility)</string>
+    <string name="game_added">Game added to library</string>
+    <string name="import_game_no_path">Could not get file path. Place the game in Downloads and try again.</string>
+    <string name="import_game_creating_container">Preparing…</string>
     <string name="input_controls">Input Controls</string>
     <string name="no_items_to_display">No items to display</string>
     <string name="new_container">New Container</string>
@@ -136,6 +147,7 @@
     <string name="profile_exported_to">Profile exported to</string>
     <string name="unable_to_import_profile">Unable to import profile</string>
     <string name="wine_configuration">Wine Configuration</string>
+    <string name="configuration">Configuration</string>
     <string name="registry_keys">Registry Keys</string>
     <string name="csmt">CSMT (Command Stream Multi-Thread)</string>
     <string name="gpu_name">GPU Name</string>
@@ -206,6 +218,12 @@
     <string name="system">System</string>
     <string name="box86_preset">Box86 Preset</string>
     <string name="box64_preset">Box64 Preset</string>
+    <string name="surface_format">Surface format</string>
+    <string name="surface_format_summary">Vulkan surface format (e.g. BGRA8). Leave empty for default.</string>
+    <string name="cpu_core_limit">CPU core limit</string>
+    <string name="cpu_core_limit_summary">Max CPU cores to use (0 = no limit).</string>
+    <string name="vram_limit_mb">VRAM limit (MB)</string>
+    <string name="vram_limit_summary">Max VRAM in MB (0 = no limit).</string>
     <string name="box86_version">Box86 Version</string>
     <string name="box64_version">Box64 Version</string>
     <string name="letter">Letter</string>
@@ -276,7 +294,7 @@
     <string name="background">Background</string>
     <string name="max_device_memory">Max Device Memory</string>
     <string name="frame_rate">Frame Rate</string>
-    <string name="configuration">Configuration</string>
+    <string name="general">General</string>
     <string name="browse">Browse</string>
     <string name="magnifier">Magnifier</string>
     <string name="bring_to_front">Bring to Front</string>
@@ -287,7 +305,23 @@
     <string name="enable_box86_64_logs">Enable Box86/Box64 logs</string>
     <string name="export">Export</string>
     <string name="logs_exported_to">Logs exported to</string>
-    <string name="general">General</string>
+    <string name="game_settings_title">Game Settings</string>
+    <string name="backup_restore_tab">Backup / Restore</string>
+    <string name="touch_controls_tab">Touch Controls</string>
+    <string name="update_to_latest_cloud_config">Update to latest cloud configuration</string>
+    <string name="no_cloud_pack">No cloud config pack. Go to Cloud Config to download.</string>
+    <string name="config_updated_from_cloud">Configuration updated from cloud</string>
+    <string name="no_matching_preset">No matching preset for this game</string>
+    <string name="backup_to_local">Backup to Local</string>
+    <string name="restore_from_local">Restore from Local backup</string>
+    <string name="backup_success">Backup saved to %1$s</string>
+    <string name="backup_failed">Backup failed</string>
+    <string name="restore_success">Restore completed</string>
+    <string name="restore_failed">Restore failed</string>
+    <string name="no_backups_found">No backups found</string>
+    <string name="default_controller_layout">Default controller layout</string>
+    <string name="default_kbm_layout">Default keyboard and mouse layout</string>
+    <string name="edit_layout">Edit layout</string>
     <string name="msg_warning_install_wine">Warning: Installing a new version of Wine is recommended for testing purposes only.</string>
     <string name="startup_selection">Startup Selection</string>
     <string name="wine_debug_channel">Wine Debug Channel</string>

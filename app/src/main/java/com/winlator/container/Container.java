@@ -284,6 +284,34 @@ public class Container {
         };
     }
 
+    /**
+     * Converts an Android path to a Windows path using the container drive mapping.
+     * Returns null if the path is not under any mapped drive.
+     */
+    public static String androidPathToWindowsPath(String drives, String androidPath) {
+        if (androidPath == null || androidPath.isEmpty()) return null;
+        String normalized = androidPath.replace('\\', '/');
+        if (!normalized.endsWith("/")) normalized = normalized + "/";
+        String bestLetter = null;
+        String bestDrivePath = null;
+        int bestLen = -1;
+        for (String[] drive : drivesIterator(drives)) {
+            String path = drive[1].replace('\\', '/');
+            if (!path.endsWith("/")) path = path + "/";
+            if (normalized.startsWith(path) && path.length() > bestLen) {
+                bestLen = path.length();
+                bestLetter = drive[0];
+                bestDrivePath = path;
+            }
+        }
+        if (bestLetter == null || bestDrivePath == null) return null;
+        String relative = normalized.substring(bestDrivePath.length());
+        if (relative.endsWith("/")) relative = relative.substring(0, relative.length() - 1);
+        relative = relative.replace("/", "\\");
+        if (relative.startsWith("\\")) relative = relative.substring(1);
+        return bestLetter + ":\\" + relative;
+    }
+
     public void saveData() {
         try {
             JSONObject data = new JSONObject();

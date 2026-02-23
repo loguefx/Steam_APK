@@ -1,0 +1,54 @@
+{
+  "sections": [
+    {
+      "id": "featured",
+      "title": "Featured",
+      "items": [
+        {
+          "id": "portal2",
+          "title": "Portal 2",
+          "subtitle": "Puzzle platformer",
+          "badge": "Works Great",
+          "appId": "620"
+        },
+        {
+          "id": "hollowknight",
+          "title": "Hollow Knight",
+          "subtitle": "Metroidvania",
+          "badge": "Works Great",
+          "appId": "367520"
+        }
+      ]
+    },
+    {
+      "id": "best_on_device",
+      "title": "Best on your device",
+      "items": [
+        {
+          "id": "indie",
+          "title": "Indie & 2D",
+          "subtitle": "Lightweight games that run well",
+          "badge": "Works"
+        },
+        {
+          "id": "source",
+          "title": "Source engine games",
+          "subtitle": "Half-Life 2, Portal, Left 4 Dead",
+          "badge": "Works"
+        }
+      ]
+    },
+    {
+      "id": "newly_compatible",
+      "title": "Newly compatible",
+      "items": [
+        {
+          "id": "experimental",
+          "title": "Experimental",
+          "subtitle": "Try with Safe profile if needed",
+          "badge": "Experimental"
+        }
+      ]
+    }
+  ]
+}

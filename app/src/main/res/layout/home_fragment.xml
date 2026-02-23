@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gamehub_background"
+    android:orientation="vertical">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/HomeRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+    <TextView
+        android:id="@+id/HomeEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="@string/home_installed_games"
+        android:textColor="@color/gamehub_text_secondary"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@color/gamehub_surface"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="A " android:textColor="@color/gamehub_accent" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/steam_play" android:textColor="@color/gamehub_text_secondary" android:textSize="12sp" />
+        <View android:layout_width="24dp" android:layout_height="0dp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Y " android:textColor="@color/gamehub_accent" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/controller_y_search" android:textColor="@color/gamehub_text_secondary" android:textSize="12sp" />
+        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="B " android:textColor="@color/gamehub_accent" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/controller_b_back" android:textColor="@color/gamehub_text_secondary" android:textSize="12sp" />
+    </LinearLayout>
+</LinearLayout>

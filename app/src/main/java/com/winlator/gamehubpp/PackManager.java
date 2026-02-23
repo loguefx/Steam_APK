@@ -203,17 +203,28 @@ public final class PackManager {
         List<String> gameIds = profileStore.listGameIds();
         int applied = 0;
         for (String gameId : gameIds) {
-            String profileId = RulesEngine.matchProfileId(pack, gameId, null, device);
-            if (profileId == null) continue;
-            Profile p = pack.profiles.get(profileId);
-            if (p == null) continue;
-            String storedId = "profile_pack_" + pack.packId + "_" + p.id;
-            Profile stored = new Profile(storedId, p.name + " (Candidate)", "pack",
-                p.components, p.settings, p.constraints);
-            profileStore.saveProfile(stored);
-            profileStore.setCandidate(gameId, storedId);
-            applied++;
+            if (applyPackAsCandidateForGame(pack, gameId, null, profileStore, device)) applied++;
         }
         return applied;
+    }
+
+    /**
+     * Apply pack as Candidate for a single game if rules match. Does not overwrite LKG (only sets Candidate).
+     * @param exeSha256 optional; pass null to match by device only (rules with empty exe_sha256).
+     * @return true if a preset was applied
+     */
+    public boolean applyPackAsCandidateForGame(ConfigPack pack, String gameId, String exeSha256,
+                                                ProfileStore profileStore, DeviceInfo device) {
+        if (pack == null || pack.profiles == null) return false;
+        String profileId = RulesEngine.matchProfileId(pack, gameId, exeSha256, device);
+        if (profileId == null) return false;
+        Profile p = pack.profiles.get(profileId);
+        if (p == null) return false;
+        String storedId = "profile_pack_" + pack.packId + "_" + p.id;
+        Profile stored = new Profile(storedId, p.name + " (Candidate)", "pack",
+            p.components, p.settings, p.constraints);
+        profileStore.saveProfile(stored);
+        profileStore.setCandidate(gameId, storedId);
+        return true;
     }
 }
