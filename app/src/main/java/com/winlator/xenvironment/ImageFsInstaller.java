@@ -49,7 +49,6 @@ public abstract class ImageFsInstaller {
 
         final long assetSize = FileUtils.getSize(activity, "imagefs.txz");
         if (assetSize <= 0) {
-            AppUtils.showToast(activity, R.string.system_files_asset_missing);
             return;
         }
 

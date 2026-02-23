@@ -248,40 +248,56 @@ public class Container {
         return new File(rootDir, ".wine/drive_c/ProgramData/Microsoft/Windows/Start Menu/");
     }
 
-    /** Steam install root inside container. Resolves to the path that actually contains steam.exe (Program Files (x86)/Steam or Program Files/Steam). */
+    /** Steam install root inside container. Resolves to the path that actually contains steam.exe (standard paths first, then search under drive_c). */
     public File getSteamRootDir() {
         File rootDir = getRootDir();
         if (rootDir == null || !rootDir.isDirectory()) return new File(this.rootDir, ".wine/drive_c/Program Files (x86)/Steam");
-        String[] candidates = {
-            ".wine/drive_c/Program Files (x86)/Steam",
-            ".wine/drive_c/Program Files/Steam"
-        };
-        for (String path : candidates) {
-            File steamRoot = new File(rootDir, path);
-            if (steamRoot.isDirectory() && new File(steamRoot, "steam.exe").isFile())
-                return steamRoot;
-        }
-        return new File(rootDir, ".wine/drive_c/Program Files (x86)/Steam");
+        File steamRoot = findSteamRoot(rootDir);
+        return steamRoot != null ? steamRoot : new File(rootDir, ".wine/drive_c/Program Files (x86)/Steam");
     }
 
     /** Windows path for Steam root (for .desktop Exec=wine "C:\...\steam.exe"). */
     public String getSteamRootWindowsPath() {
         File rootDir = getRootDir();
         if (rootDir == null || !rootDir.isDirectory()) return "C:\\Program Files (x86)\\Steam";
+        File steamRoot = findSteamRoot(rootDir);
+        if (steamRoot == null) return "C:\\Program Files (x86)\\Steam";
+        File driveC = new File(rootDir, ".wine/drive_c");
+        String abs = steamRoot.getAbsolutePath();
+        String base = driveC.getAbsolutePath();
+        if (!abs.startsWith(base) || abs.length() <= base.length()) return "C:\\Program Files (x86)\\Steam";
+        String relative = abs.substring(base.length()).replace('/', '\\');
+        if (relative.startsWith("\\")) relative = relative.substring(1);
+        return "C:\\" + relative.replace("/", "\\");
+    }
+
+    /** Find directory containing steam.exe: check standard paths first, then search under drive_c (max depth 8). */
+    private static File findSteamRoot(File rootDir) {
+        File driveC = new File(rootDir, ".wine/drive_c");
+        if (!driveC.isDirectory()) return null;
         String[] candidates = {
-            ".wine/drive_c/Program Files (x86)/Steam",
-            ".wine/drive_c/Program Files/Steam"
+            "Program Files (x86)/Steam",
+            "Program Files/Steam"
         };
-        String[] winPaths = {
-            "C:\\Program Files (x86)\\Steam",
-            "C:\\Program Files\\Steam"
-        };
-        for (int i = 0; i < candidates.length; i++) {
-            File steamRoot = new File(rootDir, candidates[i]);
+        for (String path : candidates) {
+            File steamRoot = new File(driveC, path);
             if (steamRoot.isDirectory() && new File(steamRoot, "steam.exe").isFile())
-                return winPaths[i];
+                return steamRoot;
         }
-        return "C:\\Program Files (x86)\\Steam";
+        return searchSteamExe(driveC, 0, 8);
+    }
+
+    private static File searchSteamExe(File dir, int depth, int maxDepth) {
+        if (depth > maxDepth) return null;
+        File steamExe = new File(dir, "steam.exe");
+        if (steamExe.isFile()) return dir;
+        File[] children = dir.listFiles(File::isDirectory);
+        if (children == null) return null;
+        for (File child : children) {
+            File found = searchSteamExe(child, depth + 1, maxDepth);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     public File getIconsDir(int size) {
